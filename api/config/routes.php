@@ -75,7 +75,8 @@ return function (App $app) {
                 $apiBaseUrl . '/api/tags'
             ]
         ];
-        $response->getBody()->write(json_encode($payload, JSON_PRETTY_PRINT));
+        // Add JSON_UNESCAPED_SLASHES to prevent escaping of forward slashes
+        $response->getBody()->write(json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
         return $response->withHeader('Content-Type', 'application/json');
     });
 
