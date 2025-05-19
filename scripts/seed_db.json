@@ -1,0 +1,502 @@
+[
+  {
+    "title": "Python Email Validator",
+    "description": "Simple regex to check if a string is a valid email format. Not foolproof but good for basic checks.",
+    "username": "pyDevGuru",
+    "language": "python",
+    "tags": ["python", "regex", "validation"],
+    "code": "import re\n\ndef is_valid_email(email):\n    regex = r'^\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b'\n    return re.fullmatch(regex, email) is not None\n\n# Example\n# print(is_valid_email(\"test@example.com\"))\n# print(is_valid_email(\"invalid-email\"))",
+    "created_at": "2025-05-10T10:00:00Z",
+    "updated_at": "2025-05-10T10:05:00Z"
+  },
+  {
+    "title": "JS Toggle Dark Mode",
+    "description": "Basic JavaScript to toggle a 'dark-mode' class on the body. Assumes CSS handles the styling.",
+    "username": "frontendFan",
+    "language": "javascript",
+    "tags": ["javascript", "dom", "darkmode"],
+    "code": "const toggleButton = document.getElementById('darkModeToggle');\n\ntoggleButton.addEventListener('click', () => {\n    document.body.classList.toggle('dark-mode');\n    // Optionally save preference to localStorage\n    if (document.body.classList.contains('dark-mode')) {\n        localStorage.setItem('theme', 'dark');\n    } else {\n        localStorage.setItem('theme', 'light');\n    }\n});\n\n// On page load, check localStorage\n// if (localStorage.getItem('theme') === 'dark') {\n//     document.body.classList.add('dark-mode');\n// }",
+    "created_at": "2025-05-11T14:30:00Z",
+    "updated_at": "2025-05-11T14:30:00Z"
+  },
+  {
+    "title": "PHP Get User by ID (PDO)",
+    "description": "Simple PHP function to fetch a user from DB using PDO. Remember to handle exceptions properly in real app.",
+    "username": "phpMaster",
+    "language": "php",
+    "tags": ["php", "pdo", "database"],
+    "code": "<?php\nfunction getUserById(PDO $pdo, int $userId): ?array\n{\n    $stmt = $pdo->prepare('SELECT id, username, email FROM users WHERE id = :id');\n    $stmt->bindParam(':id', $userId, PDO::PARAM_INT);\n    $stmt->execute();\n    $user = $stmt->fetch(PDO::FETCH_ASSOC);\n    return $user ?: null;\n}\n// Usage example:\n// $user = getUserById($pdo_connection, 1);\n// if ($user) { var_dump($user); } else { echo 'User not found'; }",
+    "created_at": "2025-05-12T09:15:00Z",
+    "updated_at": "2025-05-12T10:00:00Z"
+  },
+  {
+    "title": "Java String Reverse",
+    "description": "A common Java interview question - reversing a string without using built-in reverse methods.",
+    "username": "javaCoderPro",
+    "language": "java",
+    "tags": ["java", "string", "algorithm"],
+    "code": "public class StringUtil {\n    public static String reverseString(String str) {\n        if (str == null || str.isEmpty()) {\n            return str;\n        }\n        StringBuilder reversed = new StringBuilder();\n        for (int i = str.length() - 1; i >= 0; i--) {\n            reversed.append(str.charAt(i));\n        }\n        return reversed.toString();\n    }\n\n    // public static void main(String[] args) {\n    //     System.out.println(reverseString(\"hello\")); // olleh\n    // }\n}",
+    "created_at": "2025-05-13T11:05:00Z",
+    "updated_at": "2025-05-13T11:05:00Z"
+  },
+  {
+    "title": "C# LINQ Get Even Numbers",
+    "description": "Simple C# LINQ query to filter even numbers from a list.",
+    "username": "dotNetNinja",
+    "language": "csharp",
+    "tags": ["csharp", "linq"],
+    "code": "using System.Collections.Generic;\nusing System.Linq;\n\npublic class NumberFilters\n{\n    public IEnumerable<int> GetEvenNumbers(List<int> numbers)\n    {\n        return numbers.Where(n => n % 2 == 0).ToList();\n    }\n}\n\n// Example:\n// var filter = new NumberFilters();\n// var evens = filter.GetEvenNumbers(new List<int> { 1, 2, 3, 4, 5, 6 });\n// foreach(var num in evens) Console.WriteLine(num);",
+    "created_at": "2025-05-14T16:45:00Z",
+    "updated_at": "2025-05-14T17:00:00Z"
+  },
+  {
+    "title": "Ruby Read File Lines",
+    "description": "Ruby snippet to read all lines from a file into an array.",
+    "username": "rubyRider",
+    "language": "ruby",
+    "tags": ["ruby", "fileio"],
+    "code": "# Reads lines from 'data.txt' into an array\ndef read_lines_from_file(filepath)\n  begin\n    File.readlines(filepath).map(&:chomp)\n  rescue Errno::ENOENT\n    puts \"Error: File not found at #{filepath}\"\n    []\n  end\nend\n\n# lines = read_lines_from_file('data.txt')\n# lines.each { |line| puts line }",
+    "created_at": "2025-05-15T08:20:00Z",
+    "updated_at": "2025-05-15T08:20:00Z"
+  },
+  {
+    "title": "Go Simple HTTP Server",
+    "description": "A very basic HTTP server in Go that responds with 'Hello, World!'.",
+    "username": "goGopher",
+    "language": "go",
+    "tags": ["go", "http", "web"],
+    "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"log\"\n\t\"net/http\"\n)\n\nfunc helloHandler(w http.ResponseWriter, r *http.Request) {\n\tfmt.Fprintf(w, \"Hello, World!\")\n}\n\nfunc main() {\n\thttp.HandleFunc(\"/hello\", helloHandler)\n\tfmt.Println(\"Starting server on :8080\")\n\tif err := http.ListenAndServe(\":8080\", nil); err != nil {\n\t\tlog.Fatal(err)\n\t}\n}",
+    "created_at": "2025-05-16T12:00:00Z",
+    "updated_at": "2025-05-16T12:10:00Z"
+  },
+  {
+    "title": "SQL Find Duplicate Emails",
+    "description": "SQL query to find email addresses that appear more than once in a users table.",
+    "username": "sqlSensei",
+    "language": "sql",
+    "tags": ["sql", "query", "duplicates"],
+    "code": "SELECT\n    email,\n    COUNT(email) AS occurrences\nFROM\n    users\nGROUP BY\n    email\nHAVING\n    COUNT(email) > 1\nORDER BY\n    occurrences DESC;",
+    "created_at": "2025-05-17T10:30:00Z",
+    "updated_at": "2025-05-17T10:30:00Z"
+  },
+  {
+    "title": "HTML/CSS Simple Card",
+    "description": "Basic HTML structure and CSS for a simple content card.",
+    "username": "webDesigner",
+    "language": "html",
+    "tags": ["html", "css", "ui"],
+    "code": "<!-- HTML -->\n<div class=\"card\">\n  <img src=\"placeholder.jpg\" alt=\"Card image\" style=\"width:100%\">\n  <div class=\"container\">\n    <h4><b>Card Title</b></h4> \n    <p>Some text about the card content goes here.</p> \n  </div>\n</div>\n\n<style>\n/* CSS */\n.card {\n  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);\n  transition: 0.3s;\n  width: 300px;\n  border-radius: 5px;\n}\n\n.card:hover {\n  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);\n}\n\n.card img {\n  border-radius: 5px 5px 0 0;\n}\n\n.container {\n  padding: 12px 16px;\n}\n</style>",
+    "created_at": "2025-05-18T15:00:00Z",
+    "updated_at": "2025-05-18T15:00:00Z"
+  },
+  {
+    "title": "Bash Find & Replace in Files",
+    "description": "Bash one-liner using find and sed to replace a string in all .txt files in current directory and subdirectories.",
+    "username": "shellScripter",
+    "language": "bash",
+    "tags": ["bash", "sed", "find", "script"],
+    "code": "# Replace 'old_string' with 'new_string' in all .txt files\n# Be careful with this, test it first!\n# find . -type f -name \"*.txt\" -print0 | xargs -0 sed -i 's/old_string/new_string/g'\n\n# Safer version (creates backups .bak):\n# find . -type f -name \"*.txt\" -print0 | xargs -0 sed -i.bak 's/old_string/new_string/g'",
+    "created_at": "2025-05-19T09:00:00Z",
+    "updated_at": "2025-05-19T09:00:00Z"
+  },
+  {
+    "title": "Python Flask Minimal App",
+    "description": "A barebones Flask application to get a web server running quickly.",
+    "username": "flaskFanatic",
+    "language": "python",
+    "tags": ["python", "flask", "web", "backend"],
+    "code": "from flask import Flask\n\napp = Flask(__name__)\n\n@app.route('/')\ndef hello_world():\n    return 'Hello, Flask!'\n\nif __name__ == '__main__':\n    app.run(debug=True)",
+    "created_at": "2025-05-20T10:15:00Z",
+    "updated_at": "2025-05-20T10:20:00Z"
+  },
+  {
+    "title": "JS Fetch API GET Request",
+    "description": "Example of using the Fetch API in JavaScript to make a GET request and handle the JSON response.",
+    "username": "jsNinja",
+    "language": "javascript",
+    "tags": ["javascript", "fetch", "api", "async"],
+    "code": "async function fetchData(url) {\n  try {\n    const response = await fetch(url);\n    if (!response.ok) {\n      throw new Error(`HTTP error! status: ${response.status}`);\n    }\n    const data = await response.json();\n    console.log(data);\n    return data;\n  } catch (error) {\n    console.error('Fetch error:', error);\n  }\n}\n\n// fetchData('https://api.example.com/data');",
+    "created_at": "2025-05-20T11:00:00Z",
+    "updated_at": "2025-05-20T11:05:00Z"
+  },
+  {
+    "title": "PHP Array to CSV String",
+    "description": "Function to convert a 2D PHP array into a CSV formatted string.",
+    "username": "phpPro",
+    "language": "php",
+    "tags": ["php", "csv", "array", "utility"],
+    "code": "<?php\nfunction arrayToCsv(array &$array)\n{\n    if (count($array) == 0) {\n        return null;\n    }\n    ob_start();\n    $df = fopen(\"php://output\", 'w');\n    fputcsv($df, array_keys(reset($array))); // Add header row\n    foreach ($array as $row) {\n        fputcsv($df, $row);\n    }\n    fclose($df);\n    return ob_get_clean();\n}\n\n// $data = [\n//   ['name' => 'John Doe', 'email' => 'john@example.com'],\n//   ['name' => 'Jane Doe', 'email' => 'jane@example.com']\n// ];\n// echo arrayToCsv($data);",
+    "created_at": "2025-05-21T09:30:00Z",
+    "updated_at": "2025-05-21T09:30:00Z"
+  },
+  {
+    "title": "Java Read File with Scanner",
+    "description": "Reading a text file line by line in Java using the Scanner class.",
+    "username": "javaGuru",
+    "language": "java",
+    "tags": ["java", "fileio", "scanner"],
+    "code": "import java.io.File;\nimport java.io.FileNotFoundException;\nimport java.util.Scanner;\n\npublic class FileReader {\n    public void readFile(String filePath) {\n        try {\n            File myObj = new File(filePath);\n            Scanner myReader = new Scanner(myObj);\n            while (myReader.hasNextLine()) {\n                String data = myReader.nextLine();\n                System.out.println(data);\n            }\n            myReader.close();\n        } catch (FileNotFoundException e) {\n            System.out.println(\"An error occurred.\");\n            e.printStackTrace();\n        }\n    }\n    // public static void main(String[] args) {\n    //     FileReader reader = new FileReader();\n    //     reader.readFile(\"filename.txt\");\n    // }\n}",
+    "created_at": "2025-05-21T14:00:00Z",
+    "updated_at": "2025-05-21T14:05:00Z"
+  },
+  {
+    "title": "C# DateTime Formatting",
+    "description": "Common ways to format DateTime objects into strings in C#.",
+    "username": "csharpDev",
+    "language": "csharp",
+    "tags": ["csharp", "datetime", "formatting"],
+    "code": "using System;\n\npublic class DateFormatter\n{\n    public void ShowFormattedDates(DateTime dt)\n    {\n        Console.WriteLine($\"General: {dt}\"); // General date and time\n        Console.WriteLine($\"Short Date: {dt:d}\"); // Short date (e.g., 5/21/2025)\n        Console.WriteLine($\"Long Date: {dt:D}\"); // Long date (e.g., Wednesday, May 21, 2025)\n        Console.WriteLine($\"Custom: {dt:yyyy-MM-dd HH:mm:ss}\"); // Custom format\n    }\n    // public static void Main(string[] args) {\n    //     DateFormatter df = new DateFormatter();\n    //     df.ShowFormattedDates(DateTime.Now);\n    // }\n}",
+    "created_at": "2025-05-22T10:00:00Z",
+    "updated_at": "2025-05-22T10:00:00Z"
+  },
+  {
+    "title": "Ruby Hash Merge",
+    "description": "Demonstrating how to merge two hashes in Ruby, with options for handling duplicate keys.",
+    "username": "rubyist",
+    "language": "ruby",
+    "tags": ["ruby", "hash", "collections"],
+    "code": "hash1 = { \"a\" => 100, \"b\" => 200 }\nhash2 = { \"b\" => 250, \"c\" => 300 }\n\n# Merge, hash2 wins on duplicate keys\nmerged_hash = hash1.merge(hash2)\nputs \"Merged (hash2 wins): #{merged_hash}\"\n\n# Merge with a block to sum values for duplicate keys\nmerged_with_block = hash1.merge(hash2) { |key, oldval, newval| oldval + newval }\nputs \"Merged (sum duplicates): #{merged_with_block}\"",
+    "created_at": "2025-05-22T15:30:00Z",
+    "updated_at": "2025-05-22T15:35:00Z"
+  },
+  {
+    "title": "Go Check File Exists",
+    "description": "Function in Go to check if a file or directory exists at a given path.",
+    "username": "goDev",
+    "language": "go",
+    "tags": ["go", "filesystem", "utility"],
+    "code": "package main\n\nimport (\n\t\"fmt\"\n\t\"os\"\n)\n\n// Exists reports whether the named file or directory exists.\nfunc Exists(name string) bool {\n\tif _, err := os.Stat(name); err != nil {\n\t\tif os.IsNotExist(err) {\n\t\t\treturn false\n\t\t}\n\t}\n\treturn true\n}\n\nfunc main() {\n\tfmt.Println(Exists(\"myfile.txt\"))      // Check for a file\n\tfmt.Println(Exists(\"/tmp\"))            // Check for a directory\n\tfmt.Println(Exists(\"nonexistent.txt\"))\n}",
+    "created_at": "2025-05-23T09:00:00Z",
+    "updated_at": "2025-05-23T09:00:00Z"
+  },
+  {
+    "title": "SQL Select Distinct Values",
+    "description": "Basic SQL query to select unique values from a specific column in a table.",
+    "username": "dbAdmin",
+    "language": "sql",
+    "tags": ["sql", "query", "distinct"],
+    "code": "SELECT DISTINCT\n    category\nFROM\n    products\nORDER BY\n    category ASC;",
+    "created_at": "2025-05-23T11:45:00Z",
+    "updated_at": "2025-05-23T11:45:00Z"
+  },
+  {
+    "title": "HTML Basic Form Structure",
+    "description": "A fundamental HTML structure for a simple contact form.",
+    "username": "htmlHero",
+    "language": "html",
+    "tags": ["html", "form", "webdev"],
+    "code": "<form action=\"/submit-form\" method=\"post\">\n  <div>\n    <label for=\"name\">Name:</label>\n    <input type=\"text\" id=\"name\" name=\"user_name\">\n  </div>\n  <div>\n    <label for=\"mail\">E-mail:</label>\n    <input type=\"email\" id=\"mail\" name=\"user_email\">\n  </div>\n  <div>\n    <label for=\"msg\">Message:</label>\n    <textarea id=\"msg\" name=\"user_message\"></textarea>\n  </div>\n  <div class=\"button\">\n    <button type=\"submit\">Send your message</button>\n  </div>\n</form>",
+    "created_at": "2025-05-24T13:00:00Z",
+    "updated_at": "2025-05-24T13:00:00Z"
+  },
+  {
+    "title": "Bash Script to Count Files",
+    "description": "A simple Bash script to count the number of files in the current directory.",
+    "username": "bashBoss",
+    "language": "bash",
+    "tags": ["bash", "scripting", "filesystem"],
+    "code": "#!/bin/bash\n\n# Count only files, not directories\nfile_count=$(find . -maxdepth 1 -type f | wc -l)\n\necho \"Number of files in current directory: $file_count\"",
+    "created_at": "2025-05-24T16:20:00Z",
+    "updated_at": "2025-05-24T16:20:00Z"
+  },
+  {
+    "title": "Python Django URL Routing",
+    "description": "Basic example of defining a URL route in a Django `urls.py` file.",
+    "username": "djangoDev",
+    "language": "python",
+    "tags": ["python", "django", "web", "routing"],
+    "code": "# In your app's urls.py\nfrom django.urls import path\nfrom . import views\n\nurlpatterns = [\n    path('hello/', views.hello_view, name='hello_view'),\n    # path('articles/<int:year>/', views.year_archive, name='article_year_archive'),\n]",
+    "created_at": "2025-05-25T09:00:00Z",
+    "updated_at": "2025-05-25T09:05:00Z"
+  },
+  {
+    "title": "JS Array Map Example",
+    "description": "Using the JavaScript array `map` method to create a new array with transformed elements.",
+    "username": "es6Fan",
+    "language": "javascript",
+    "tags": ["javascript", "array", "map", "es6"],
+    "code": "const numbers = [1, 4, 9, 16];\n\n// Pass a function to map\nconst roots = numbers.map(Math.sqrt);\n// roots is now [1, 2, 3, 4]\n// numbers is still [1, 4, 9, 16]\n\nconsole.log(roots);\n\nconst doubled = numbers.map(num => num * 2);\n// doubled is [2, 8, 18, 32]\nconsole.log(doubled);",
+    "created_at": "2025-05-25T11:30:00Z",
+    "updated_at": "2025-05-25T11:30:00Z"
+  },
+  {
+    "title": "PHP Check if String Contains Substring",
+    "description": "Different ways to check if a PHP string contains a specific substring.",
+    "username": "phpHelper",
+    "language": "php",
+    "tags": ["php", "string", "search"],
+    "code": "<?php\n$mainString = \"Hello world, this is a test string.\";\n$substring1 = \"world\";\n$substring2 = \"planet\";\n\n// Method 1: strpos()\nif (strpos($mainString, $substring1) !== false) {\n    echo \"'{$substring1}' found using strpos().\\n\";\n}\n\n// Method 2: str_contains() (PHP 8+)\nif (function_exists('str_contains')) {\n    if (str_contains($mainString, $substring1)) {\n        echo \"'{$substring1}' found using str_contains().\\n\";\n    }\n    if (!str_contains($mainString, $substring2)) {\n        echo \"'{$substring2}' not found using str_contains().\\n\";\n    }\n}",
+    "created_at": "2025-05-26T10:10:00Z",
+    "updated_at": "2025-05-26T10:15:00Z"
+  },
+  {
+    "title": "Java ArrayList Initialization",
+    "description": "Various ways to initialize an ArrayList in Java.",
+    "username": "java Enthusiast",
+    "language": "java",
+    "tags": ["java", "arraylist", "collections", "initialization"],
+    "code": "import java.util.ArrayList;\nimport java.util.Arrays;\nimport java.util.List;\n\npublic class ArrayListInit {\n    public static void main(String[] args) {\n        // 1. Using default constructor\n        List<String> list1 = new ArrayList<>();\n        list1.add(\"Apple\");\n\n        // 2. Using Arrays.asList()\n        List<String> list2 = new ArrayList<>(Arrays.asList(\"Banana\", \"Cherry\"));\n\n        // 3. Using List.of() (Java 9+), creates an immutable list, then to ArrayList\n        // List<String> immutableList = List.of(\"Date\", \"Elderberry\");\n        // List<String> list3 = new ArrayList<>(immutableList);\n\n        // 4. Anonymous inner class (less common now)\n        List<Integer> list4 = new ArrayList<>() {{\n            add(1);\n            add(2);\n        }};\n\n        System.out.println(list1);\n        System.out.println(list2);\n        // System.out.println(list3);\n        System.out.println(list4);\n    }\n}",
+    "created_at": "2025-05-26T14:45:00Z",
+    "updated_at": "2025-05-26T14:45:00Z"
+  },
+  {
+    "title": "C# Read Text File",
+    "description": "Simple C# code to read all text from a file into a string.",
+    "username": "csharpCorner",
+    "language": "csharp",
+    "tags": ["csharp", "fileio", "text"],
+    "code": "using System.IO;\nusing System;\n\npublic class FileReader\n{\n    public string ReadAllText(string filePath)\n    {\n        try\n        {\n            return File.ReadAllText(filePath);\n        }\n        catch (IOException e)\n        {\n            Console.WriteLine(\"An error occurred while reading the file:\");\n            Console.WriteLine(e.Message);\n            return null;\n        }\n    }\n\n    // public static void Main(string[] args)\n    // {\n    //     FileReader reader = new FileReader();\n    //     string content = reader.ReadAllText(\"example.txt\");\n    //     if (content != null) {\n    //         Console.WriteLine(content);\n    //     }\n    // }\n}",
+    "created_at": "2025-05-27T09:20:00Z",
+    "updated_at": "2025-05-27T09:25:00Z"
+  },
+  {
+    "title": "Ruby Iterate Over Array with Index",
+    "description": "How to iterate over a Ruby array and get both the element and its index.",
+    "username": "rubyFan",
+    "language": "ruby",
+    "tags": ["ruby", "array", "iteration", "index"],
+    "code": "fruits = [\"apple\", \"banana\", \"cherry\"]\n\nfruits.each_with_index do |fruit, index|\n  puts \"Fruit at index #{index}: #{fruit}\"\nend\n\n# Another way using .map.with_index for transformation\nindexed_fruits = fruits.map.with_index { |fruit, index| \"#{index + 1}. #{fruit}\" }\nputs indexed_fruits",
+    "created_at": "2025-05-27T12:00:00Z",
+    "updated_at": "2025-05-27T12:00:00Z"
+  },
+  {
+    "title": "Go Struct Definition",
+    "description": "Example of defining and using a struct in Go.",
+    "username": "gopherDude",
+    "language": "go",
+    "tags": ["go", "struct", "types"],
+    "code": "package main\n\nimport \"fmt\"\n\ntype Person struct {\n\tName string\n\tAge  int\n}\n\nfunc main() {\n\tp1 := Person{Name: \"Alice\", Age: 30}\n\tfmt.Printf(\"Name: %s, Age: %d\\n\", p1.Name, p1.Age)\n\n\tp2 := Person{\"Bob\", 25}\n\tfmt.Println(p2)\n}",
+    "created_at": "2025-05-28T10:50:00Z",
+    "updated_at": "2025-05-28T10:55:00Z"
+  },
+  {
+    "title": "SQL INNER JOIN Example",
+    "description": "A basic SQL query demonstrating an INNER JOIN between two tables.",
+    "username": "sqlGuru",
+    "language": "sql",
+    "tags": ["sql", "join", "query", "database"],
+    "code": "SELECT\n    o.order_id,\n    c.customer_name,\n    o.order_date\nFROM\n    orders o\nINNER JOIN\n    customers c ON o.customer_id = c.customer_id\nWHERE\n    o.order_date >= '2025-01-01';",
+    "created_at": "2025-05-28T15:00:00Z",
+    "updated_at": "2025-05-28T15:00:00Z"
+  },
+  {
+    "title": "HTML Image with Alt Text",
+    "description": "Correct way to include an image in HTML with essential alternative text for accessibility.",
+    "username": "webStandards",
+    "language": "html",
+    "tags": ["html", "image", "accessibility", "seo"],
+    "code": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Image Example</title>\n</head>\n<body>\n    <h1>My Awesome Page</h1>\n    <img src=\"images/cute_kitten.jpg\" alt=\"A small, fluffy grey kitten playing with a red ball of yarn.\">\n</body>\n</html>",
+    "created_at": "2025-05-29T11:10:00Z",
+    "updated_at": "2025-05-29T11:10:00Z"
+  },
+  {
+    "title": "Bash Check if Directory Exists",
+    "description": "A Bash script snippet to check if a directory exists.",
+    "username": "scriptKid",
+    "language": "bash",
+    "tags": ["bash", "scripting", "filesystem", "conditional"],
+    "code": "#!/bin/bash\n\nDIRECTORY=\"/tmp/my_app_data\"\n\nif [ -d \"$DIRECTORY\" ]; then\n  echo \"Directory '$DIRECTORY' exists.\"\nelse\n  echo \"Directory '$DIRECTORY' does not exist.\"\n  # Optionally, create it:\n  # mkdir -p \"$DIRECTORY\"\n  # echo \"Directory '$DIRECTORY' created.\"\nfi",
+    "created_at": "2025-05-29T16:45:00Z",
+    "updated_at": "2025-05-29T16:45:00Z"
+  },
+  {
+    "title": "Python List Comprehension",
+    "description": "Example of Python list comprehension for creating lists concisely.",
+    "username": "pythonista",
+    "language": "python",
+    "tags": ["python", "list-comprehension", "syntax"],
+    "code": "# Squares of numbers from 0 to 9\nsquares = [x**2 for x in range(10)]\nprint(squares)\n\n# Even numbers from a list\nnumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]\neven_numbers = [x for x in numbers if x % 2 == 0]\nprint(even_numbers)",
+    "created_at": "2025-05-30T09:30:00Z",
+    "updated_at": "2025-05-30T09:35:00Z"
+  },
+  {
+    "title": "JS LocalStorage Example",
+    "description": "Storing and retrieving data from browser's localStorage using JavaScript.",
+    "username": "webDevPro",
+    "language": "javascript",
+    "tags": ["javascript", "localstorage", "browser-storage", "web"],
+    "code": "// Store data\nlocalStorage.setItem('username', 'JohnDoe');\nlocalStorage.setItem('theme', 'dark');\n\n// Retrieve data\nconst username = localStorage.getItem('username');\nconsole.log('Username:', username);\n\n// Remove data\nlocalStorage.removeItem('theme');\n\n// Clear all data\n// localStorage.clear();",
+    "created_at": "2025-05-30T11:00:00Z",
+    "updated_at": "2025-05-30T11:00:00Z"
+  },
+  {
+    "title": "PHP Date Difference",
+    "description": "Calculating the difference between two dates in PHP.",
+    "username": "phpWizard",
+    "language": "php",
+    "tags": ["php", "date", "datetime", "difference"],
+    "code": "<?php\n$date1 = new DateTime('2025-01-15');\n$date2 = new DateTime('2025-03-10');\n\n$interval = $date1->diff($date2);\n\necho \"Difference: \" . $interval->y . \" years, \" \n     . $interval->m . \" months, \" \n     . $interval->d . \" days. \";\n\n// Total days\necho \"Total days: \" . $interval->days . \" days.\";\n?>",
+    "created_at": "2025-05-31T10:00:00Z",
+    "updated_at": "2025-05-31T10:05:00Z"
+  },
+  {
+    "title": "Java String to Integer",
+    "description": "Converting a String to an Integer in Java, with error handling.",
+    "username": "javaCoder",
+    "language": "java",
+    "tags": ["java", "string", "integer", "conversion", "parsing"],
+    "code": "public class StringConverter {\n    public static void main(String[] args) {\n        String strNum = \"123\";\n        try {\n            int num = Integer.parseInt(strNum);\n            System.out.println(\"Parsed integer: \" + num);\n        } catch (NumberFormatException e) {\n            System.err.println(\"Invalid string for integer conversion: \" + strNum);\n        }\n\n        String invalidStr = \"abc\";\n        try {\n            int num2 = Integer.parseInt(invalidStr);\n            System.out.println(\"Parsed integer: \" + num2); // This won't be reached\n        } catch (NumberFormatException e) {\n            System.err.println(\"Invalid string for integer conversion: \" + invalidStr);\n        }\n    }\n}",
+    "created_at": "2025-05-31T14:20:00Z",
+    "updated_at": "2025-05-31T14:20:00Z"
+  },
+  {
+    "title": "C# String Interpolation",
+    "description": "Using string interpolation in C# for easier string formatting.",
+    "username": "dotNetDev",
+    "language": "csharp",
+    "tags": ["csharp", "string", "interpolation", "formatting"],
+    "code": "using System;\n\npublic class InterpolationExample\n{\n    public static void Main(string[] args)\n    {\n        string name = \"Alice\";\n        int age = 30;\n        double score = 95.75;\n\n        // Basic interpolation\n        string message = $\"User {name} is {age} years old.\";\n        Console.WriteLine(message);\n\n        // Interpolation with formatting\n        string formattedScore = $\"{name}'s score: {score:F2}\"; // F2 for 2 decimal places\n        Console.WriteLine(formattedScore);\n\n        // Interpolation with expressions\n        Console.WriteLine($\"Next year, {name} will be {age + 1}.\");\n    }\n}",
+    "created_at": "2025-06-01T09:00:00Z",
+    "updated_at": "2025-06-01T09:00:00Z"
+  },
+  {
+    "title": "Ruby Read CSV File",
+    "description": "Reading data from a CSV file in Ruby using the built-in CSV library.",
+    "username": "rubyScripter",
+    "language": "ruby",
+    "tags": ["ruby", "csv", "fileio", "parsing"],
+    "code": "require 'csv'\n\nfilepath = 'data.csv' # Assuming data.csv exists\n\n# Example data.csv content:\n# name,email\n# John Doe,john@example.com\n# Jane Smith,jane@example.com\n\nbegin\n  CSV.foreach(filepath, headers: true) do |row|\n    puts \"Name: #{row['name']}, Email: #{row['email']}\"\n  end\nrescue Errno::ENOENT\n  puts \"Error: File not found at #{filepath}\"\nrescue CSV::MalformedCSVError => e\n  puts \"Error parsing CSV: #{e.message}\"\nend",
+    "created_at": "2025-06-01T11:45:00Z",
+    "updated_at": "2025-06-01T11:50:00Z"
+  },
+  {
+    "title": "Go Error Handling",
+    "description": "Common pattern for error handling in Go functions.",
+    "username": "goProgrammer",
+    "language": "go",
+    "tags": ["go", "error-handling", "best-practices"],
+    "code": "package main\n\nimport (\n\t\"errors\"\n\t\"fmt\"\n)\n\nfunc divide(a, b float64) (float64, error) {\n\tif b == 0 {\n\t\treturn 0, errors.New(\"division by zero\")\n\t}\n\treturn a / b, nil // nil error indicates success\n}\n\nfunc main() {\n\tresult, err := divide(10, 2)\n\tif err != nil {\n\t\tfmt.Println(\"Error:\", err)\n\t} else {\n\t\tfmt.Println(\"Result:\", result)\n\t}\n\n\tresult, err = divide(10, 0)\n\tif err != nil {\n\t\tfmt.Println(\"Error:\", err)\n\t} else {\n\t\tfmt.Println(\"Result:\", result)\n\t}\n}",
+    "created_at": "2025-06-02T10:30:00Z",
+    "updated_at": "2025-06-02T10:30:00Z"
+  },
+  {
+    "title": "SQL COUNT Function",
+    "description": "Using the SQL COUNT() function to count rows, optionally with a condition.",
+    "username": "dataAnalyst",
+    "language": "sql",
+    "tags": ["sql", "aggregate", "count", "query"],
+    "code": "-- Count all rows in the 'employees' table\nSELECT COUNT(*) AS total_employees\nFROM employees;\n\n-- Count employees in a specific department\nSELECT COUNT(*) AS marketing_employees\nFROM employees\nWHERE department = 'Marketing';\n\n-- Count distinct departments\nSELECT COUNT(DISTINCT department) AS distinct_departments\nFROM employees;",
+    "created_at": "2025-06-02T15:15:00Z",
+    "updated_at": "2025-06-02T15:20:00Z"
+  },
+  {
+    "title": "HTML Table Structure",
+    "description": "Basic structure of an HTML table with a header, body, and rows/cells.",
+    "username": "markupMaster",
+    "language": "html",
+    "tags": ["html", "table", "structure", "webdev"],
+    "code": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Table Example</title>\n    <style>\n        table, th, td { border: 1px solid black; border-collapse: collapse; padding: 5px; }\n        th { background-color: #f2f2f2; }\n    </style>\n</head>\n<body>\n    <h2>Employee List</h2>\n    <table>\n        <thead>\n            <tr>\n                <th>ID</th>\n                <th>Name</th>\n                <th>Department</th>\n            </tr>\n        </thead>\n        <tbody>\n            <tr>\n                <td>101</td>\n                <td>Alice Wonderland</td>\n                <td>Engineering</td>\n            </tr>\n            <tr>\n                <td>102</td>\n                <td>Bob The Builder</td>\n                <td>Operations</td>\n            </tr>\n        </tbody>\n    </table>\n</body>\n</html>",
+    "created_at": "2025-06-03T11:00:00Z",
+    "updated_at": "2025-06-03T11:00:00Z"
+  },
+  {
+    "title": "Bash Read User Input",
+    "description": "How to read input from the user in a Bash script.",
+    "username": "terminalWizard",
+    "language": "bash",
+    "tags": ["bash", "scripting", "input", "user-interaction"],
+    "code": "#!/bin/bash\n\necho \"What is your name?\"\nread user_name\n\necho \"Hello, $user_name! Nice to meet you.\"\n\nread -p \"Enter your age: \" user_age\necho \"You are $user_age years old.\"",
+    "created_at": "2025-06-03T16:00:00Z",
+    "updated_at": "2025-06-03T16:05:00Z"
+  },
+  {
+    "title": "Python Dictionary Get Method",
+    "description": "Using the .get() method for dictionaries in Python to access values safely with a default.",
+    "username": "pyGuru",
+    "language": "python",
+    "tags": ["python", "dictionary", "methods", "best-practice"],
+    "code": "my_dict = {'name': 'Alice', 'age': 30}\n\n# Accessing an existing key\nname = my_dict.get('name')\nprint(f\"Name: {name}\")\n\n# Accessing a non-existing key with a default value\ncity = my_dict.get('city', 'Unknown')\nprint(f\"City: {city}\")\n\n# Accessing a non-existing key without a default (returns None)\ncountry = my_dict.get('country')\nprint(f\"Country: {country}\")",
+    "created_at": "2025-06-04T09:15:00Z",
+    "updated_at": "2025-06-04T09:20:00Z"
+  },
+  {
+    "title": "JS Arrow Functions",
+    "description": "Examples of JavaScript arrow functions and their concise syntax.",
+    "username": "modernJSDev",
+    "language": "javascript",
+    "tags": ["javascript", "es6", "arrow-functions", "syntax"],
+    "code": "// Traditional function\nfunction add(a, b) {\n  return a + b;\n}\n\n// Arrow function equivalent\nconst addArrow = (a, b) => a + b;\nconsole.log(addArrow(5, 3)); // Output: 8\n\n// Arrow function with single parameter\nconst square = x => x * x;\nconsole.log(square(4)); // Output: 16\n\n// Arrow function with no parameters\nconst greet = () => console.log('Hello!');\ngreet();\n\n// Arrow function with multiple statements (requires curly braces and return)\nconst process = (x, y) => {\n  const sum = x + y;\n  return sum * 2;\n};\nconsole.log(process(2,3)); // Output: 10",
+    "created_at": "2025-06-04T11:30:00Z",
+    "updated_at": "2025-06-04T11:30:00Z"
+  },
+  {
+    "title": "PHP JSON Encode/Decode",
+    "description": "Converting PHP arrays/objects to JSON strings and vice-versa.",
+    "username": "phpCoder",
+    "language": "php",
+    "tags": ["php", "json", "serialization", "parsing"],
+    "code": "<?php\n// PHP array to JSON\n$dataArray = ['name' => 'John Doe', 'age' => 30, 'city' => 'New York'];\n$jsonString = json_encode($dataArray);\necho \"JSON String: \" . $jsonString . \"\\n\";\n\n// JSON string to PHP associative array\n$decodedArray = json_decode($jsonString, true);\nprint_r($decodedArray);\necho \"Name from decoded array: \" . $decodedArray['name'] . \"\\n\";\n\n// JSON string to PHP object\n$decodedObject = json_decode($jsonString);\nprint_r($decodedObject);\necho \"Age from decoded object: \" . $decodedObject->age . \"\\n\";\n?>",
+    "created_at": "2025-06-05T10:00:00Z",
+    "updated_at": "2025-06-05T10:05:00Z"
+  },
+  {
+    "title": "Java Switch Statement",
+    "description": "Example of using a switch statement in Java for multi-way branching.",
+    "username": "javaDeveloper",
+    "language": "java",
+    "tags": ["java", "control-flow", "switch", "conditional"],
+    "code": "public class SwitchExample {\n    public static void main(String[] args) {\n        int day = 4;\n        String dayString;\n\n        switch (day) {\n            case 1:  dayString = \"Monday\";\n                     break;\n            case 2:  dayString = \"Tuesday\";\n                     break;\n            case 3:  dayString = \"Wednesday\";\n                     break;\n            case 4:  dayString = \"Thursday\";\n                     break;\n            case 5:  dayString = \"Friday\";\n                     break;\n            case 6:  dayString = \"Saturday\";\n                     break;\n            case 7:  dayString = \"Sunday\";\n                     break;\n            default: dayString = \"Invalid day\";\n                     break;\n        }\n        System.out.println(dayString);\n    }\n}",
+    "created_at": "2025-06-05T14:40:00Z",
+    "updated_at": "2025-06-05T14:40:00Z"
+  },
+  {
+    "title": "C# List Operations",
+    "description": "Common operations on Lists in C#, like adding, removing, and finding elements.",
+    "username": "csharpPro",
+    "language": "csharp",
+    "tags": ["csharp", "list", "collections", "crud"],
+    "code": "using System;\nusing System.Collections.Generic;\n\npublic class ListOperations\n{\n    public static void Main(string[] args)\n    {\n        List<string> fruits = new List<string>();\n\n        // Add elements\n        fruits.Add(\"Apple\");\n        fruits.Add(\"Banana\");\n        fruits.Add(\"Cherry\");\n        Console.WriteLine(\"Initial list: \" + string.Join(\", \", fruits));\n\n        // Remove element\n        fruits.Remove(\"Banana\");\n        Console.WriteLine(\"After removing Banana: \" + string.Join(\", \", fruits));\n\n        // Check if contains\n        bool hasApple = fruits.Contains(\"Apple\");\n        Console.WriteLine(\"Contains Apple? \" + hasApple);\n\n        // Get count\n        Console.WriteLine(\"Count: \" + fruits.Count);\n\n        // Iterate\n        foreach (string fruit in fruits)\n        {\n            Console.WriteLine(\"- \" + fruit);\n        }\n    }\n}",
+    "created_at": "2025-06-06T09:05:00Z",
+    "updated_at": "2025-06-06T09:10:00Z"
+  },
+  {
+    "title": "Ruby String Interpolation",
+    "description": "How to embed expressions into strings in Ruby.",
+    "username": "rubyGem",
+    "language": "ruby",
+    "tags": ["ruby", "string", "interpolation", "syntax"],
+    "code": "name = \"Alice\"\nage = 30\n\n# String interpolation using # { }\nputs \"Hello, #{name}! You are #{age} years old.\"\n\n# Expressions can be used too\nputs \"Next year, you will be #{age + 1}.\"\n\n# For single quotes, interpolation does not work\nputs 'Hello, #{name}! This will not interpolate.'",
+    "created_at": "2025-06-06T12:15:00Z",
+    "updated_at": "2025-06-06T12:15:00Z"
+  },
+  {
+    "title": "Go Slices",
+    "description": "Basic usage of slices in Go, including creation and appending.",
+    "username": "goSliceMaster",
+    "language": "go",
+    "tags": ["go", "slices", "data-structures"],
+    "code": "package main\n\nimport \"fmt\"\n\nfunc main() {\n\t// Creating a slice using make\n\ts := make([]string, 3)\n\ts[0] = \"a\"\n\ts[1] = \"b\"\n\ts[2] = \"c\"\n\tfmt.Println(\"Slice s:\", s)\n\n\t// Appending to a slice\n\ts = append(s, \"d\")\n\ts = append(s, \"e\", \"f\")\n\tfmt.Println(\"Appended s:\", s)\n\n\t// Slice literals\n\tt := []int{1, 2, 3, 4, 5}\n\tfmt.Println(\"Slice t:\", t)\n\n\t// Slicing a slice (like Python)\n\tfmt.Println(\"t[1:3]:\", t[1:3]) // Elements at index 1 and 2\n\tfmt.Println(\"t[:3]:\", t[:3])  // Elements from start up to (but not including) index 3\n\tfmt.Println(\"t[2:]:\", t[2:])  // Elements from index 2 to end\n}",
+    "created_at": "2025-06-07T10:00:00Z",
+    "updated_at": "2025-06-07T10:05:00Z"
+  },
+  {
+    "title": "SQL WHERE Clause with AND/OR",
+    "description": "Using AND and OR operators in the SQL WHERE clause to filter results based on multiple conditions.",
+    "username": "queryMaster",
+    "language": "sql",
+    "tags": ["sql", "where", "filter", "logical-operators"],
+    "code": "-- Select products that are in 'Electronics' category AND price is less than 500\nSELECT product_name, category, price\nFROM products\nWHERE category = 'Electronics' AND price < 500;\n\n-- Select customers who are from 'USA' OR 'Canada'\nSELECT customer_name, country\nFROM customers\nWHERE country = 'USA' OR country = 'Canada';\n\n-- Select orders placed in 2024 for amounts greater than 100 OR orders from a specific customer_id\nSELECT order_id, order_date, amount, customer_id\nFROM orders\nWHERE (order_date >= '2024-01-01' AND order_date < '2025-01-01' AND amount > 100)\n   OR customer_id = 7;",
+    "created_at": "2025-06-07T15:30:00Z",
+    "updated_at": "2025-06-07T15:30:00Z"
+  },
+  {
+    "title": "HTML Semantic Elements",
+    "description": "Using HTML5 semantic elements like <article>, <section>, <nav>, <aside> for better structure.",
+    "username": "semanticWebDev",
+    "language": "html",
+    "tags": ["html", "html5", "semantic-markup", "accessibility", "seo"],
+    "code": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Semantic HTML</title>\n</head>\n<body>\n    <header>\n        <h1>My Website</h1>\n        <nav>\n            <ul><li><a href=\"#\">Home</a></li><li><a href=\"#\">About</a></li></ul>\n        </nav>\n    </header>\n    <main>\n        <article>\n            <h2>Article Title</h2>\n            <p>Content of the article...</p>\n            <section>\n                <h3>Subsection</h3>\n                <p>Details of subsection...</p>\n            </section>\n        </article>\n        <aside>\n            <h3>Related Links</h3>\n            <ul><li><a href=\"#\">Link 1</a></li></ul>\n        </aside>\n    </main>\n    <footer>\n        <p>&copy; 2025 My Website</p>\n    </footer>\n</body>\n</html>",
+    "created_at": "2025-06-08T11:20:00Z",
+    "updated_at": "2025-06-08T11:25:00Z"
+  },
+  {
+    "title": "Bash For Loop Examples",
+    "description": "Different ways to write for loops in Bash scripting.",
+    "username": "bashCommander",
+    "language": "bash",
+    "tags": ["bash", "loop", "scripting", "iteration"],
+    "code": "#!/bin/bash\n\n# Loop through a list of strings\necho \"Looping through strings:\"\nfor fruit in apple banana cherry; do\n  echo \"Fruit: $fruit\"\ndone\n\n# C-style for loop\necho -e \"\\nC-style loop:\"\nfor (( i=1; i<=5; i++ )); do\n  echo \"Count: $i\"\ndone\n\n# Loop through files in a directory\necho -e \"\\nLooping through .txt files in current directory:\"\n# for file in *.txt; do\n#   if [ -f \"$file\" ]; then # Check if it's a file\n#     echo \"Found text file: $file\"\n#   fi\n# done\n\n# Loop through numbers in a sequence\necho -e \"\\nLooping through a sequence:\"\nfor num in {1..4}; do\n    echo \"Number: $num\"\ndone",
+    "created_at": "2025-06-08T16:00:00Z",
+    "updated_at": "2025-06-08T16:00:00Z"
+  }
+]

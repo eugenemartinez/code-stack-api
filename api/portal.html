@@ -5,117 +5,216 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CodeStack API Portal</title>
     <style>
+        /* --- Loader Styles --- */
+        #loader-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f7fafc; /* Same as body background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 0.5s ease-out;
+        }
+
+        .loader {
+            border: 5px solid #e2e8f0; /* Tailwind: border-gray-300 */
+            border-top: 5px solid #4299e1; /* Tailwind: border-blue-500 */
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Initially hide the main container until loader is gone */
+        .container {
+            max-width: 800px;
+            width: 90%;
+            background: #ffffff; /* Tailwind: bg-white */
+            padding: 2.5rem; /* Tailwind: p-10 */
+            border-radius: 0.75rem; /* Tailwind: rounded-xl */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Tailwind: shadow-xl */
+            text-align: left;
+            margin-top: 1rem;
+            margin-bottom: 2rem;
+            opacity: 0; /* MODIFIED: Initially hidden */
+            transition: opacity 0.3s ease-in; /* Smooth fade-in for container */
+        }
+
+        .container.loaded { /* Class to make container visible */
+            opacity: 1;
+        }
+
+
+        /* --- Existing Animations & Styles --- */
+        @keyframes fadeInText {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInCard {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
             margin: 0;
-            padding: 0;
-            background-color: #f0f2f5;
-            color: #1c1e21;
+            background-color: #f7fafc; /* Tailwind: bg-gray-100 */
+            color: #2d3748; /* Tailwind: text-gray-800 */
             line-height: 1.6;
             display: flex;
-            justify-content: center;
-            align-items: flex-start; /* Align to top for longer content */
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem; /* Tailwind: p-8 */
             min-height: 100vh;
-            padding-top: 40px; /* Add some top padding */
-            padding-bottom: 40px; /* Add some bottom padding */
         }
-        .container {
-            max-width: 800px;
-            width: 90%; /* Responsive width */
-            background: #ffffff;
-            padding: 30px 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            text-align: left;
-        }
+        /* .container styles moved up and modified for loader */
+
         h1 {
-            color: #0d6efd; /* A nice blue */
+            color: #1a202c; /* Tailwind: text-gray-900 */
             text-align: center;
-            margin-bottom: 25px;
-            font-size: 2.2em;
-            font-weight: 600;
+            margin-bottom: 2rem; /* Tailwind: mb-8 */
+            font-size: 2.25rem; /* Tailwind: text-4xl */
+            font-weight: 700; /* Tailwind: font-bold */
+            opacity: 0;
+            animation: fadeInText 0.4s ease-out forwards;
+            animation-delay: 0.1s; /* This delay will apply after .container is visible */
+        }
+        .container > p:first-of-type {
+            margin-bottom: 1rem; /* Tailwind: mb-4 */
+            color: #4a5568; /* Tailwind: text-gray-700 */
+            line-height: 1.75; /* Tailwind: leading-relaxed */
+            opacity: 0;
+            animation: fadeInText 0.4s ease-out forwards;
+            animation-delay: 0.25s; /* This delay will apply after .container is visible */
         }
         h2 {
-            color: #343a40;
-            margin-top: 30px;
-            margin-bottom: 15px;
-            font-size: 1.6em;
-            border-bottom: 2px solid #e9ecef;
-            padding-bottom: 8px;
+            color: #2d3748; /* Tailwind: text-gray-800 */
+            margin-top: 2.5rem; /* Tailwind: mt-10 */
+            margin-bottom: 1rem; /* Tailwind: mb-4 */
+            font-size: 1.5rem; /* Tailwind: text-2xl */
+            font-weight: 600; /* Tailwind: font-semibold */
+            padding-bottom: 0.5rem; /* Tailwind: pb-2 */
+            border-bottom: 1px solid #e2e8f0; /* Tailwind: border-b border-gray-300 */
+        }
+        .links-section h2 {
+            opacity: 0;
+            animation: fadeInText 0.4s ease-out forwards;
+            animation-delay: 0.4s; /* This delay will apply after .container is visible */
         }
         p {
-            margin-bottom: 12px;
-            color: #495057;
+            margin-bottom: 1rem; /* Tailwind: mb-4 */
+            color: #4a5568; /* Tailwind: text-gray-700 */
+            line-height: 1.75; /* Tailwind: leading-relaxed */
         }
         a {
-            color: #0d6efd;
+            color: #4299e1; /* Tailwind: text-blue-500 */
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600; /* Tailwind: font-semibold */
+            transition: color 0.2s ease-in-out;
         }
         a:hover {
             text-decoration: underline;
-            color: #0a58ca;
+            color: #2b6cb0; /* Tailwind: hover:text-blue-700 */
         }
         .links-section ul {
             list-style: none;
             padding: 0;
         }
         .links-section li {
-            margin-bottom: 20px;
-            background: #f8f9fa;
-            padding: 15px 20px;
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
-            transition: box-shadow 0.2s ease-in-out;
+            margin-bottom: 1.5rem; /* Tailwind: mb-6 */
+            background: #ffffff; /* Tailwind: bg-white */
+            padding: 1.5rem; /* Tailwind: p-6 */
+            border-radius: 0.5rem; /* Tailwind: rounded-lg */
+            border: 1px solid #e2e8f0; /* Tailwind: border border-gray-300 */
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* Tailwind: shadow-md */
+            transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+            opacity: 0;
+            animation: fadeInCard 0.5s ease-out forwards;
+        }
+        .links-section li:nth-child(1) {
+            animation-delay: 0.6s; /* This delay will apply after .container is visible */
+        }
+        .links-section li:nth-child(2) {
+            animation-delay: 0.75s; /* This delay will apply after .container is visible */
+        }
+        .links-section li:nth-child(3) {
+            animation-delay: 0.9s; /* This delay will apply after .container is visible */
+        }
+        .links-section li:nth-child(4) {
+            animation-delay: 1.05s; /* This delay will apply after .container is visible */
         }
         .links-section li:hover {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* Tailwind: hover:shadow-lg */
+            transform: translateY(-3px);
         }
         .links-section li strong {
             display: block;
-            margin-bottom: 8px;
-            color: #212529;
-            font-size: 1.1em;
+            margin-bottom: 0.5rem; /* Tailwind: mb-2 */
+            color: #1a202c; /* Tailwind: text-gray-900 */
+            font-size: 1.125rem; /* Tailwind: text-lg */
+            font-weight: 600; /* Tailwind: font-semibold */
         }
         .copy-button {
-            background-color: #6c757d;
+            background-color: #4a5568; /* Tailwind: bg-gray-700 */
             color: white;
             border: none;
-            padding: 5px 10px;
-            font-size: 0.8em;
-            border-radius: 4px;
+            padding: 0.5rem 0.75rem; /* Tailwind: px-3 py-2 */
+            font-size: 0.875rem; /* Tailwind: text-sm */
+            font-weight: 500; /* Tailwind: font-medium */
+            border-radius: 0.375rem; /* Tailwind: rounded-md */
             cursor: pointer;
-            margin-left: 8px;
-            transition: background-color 0.2s ease;
+            margin-left: 0.5rem; /* Tailwind: ml-2 */
+            transition: background-color 0.2s ease-in-out, transform 0.15s ease-in-out;
+            vertical-align: middle;
         }
         .copy-button:hover {
-            background-color: #5a6268;
+            background-color: #2d3748; /* Tailwind: hover:bg-gray-800 */
+            transform: translateY(-1px);
+        }
+        .copy-button:active {
+            transform: translateY(0px);
         }
         .copy-button.copied {
-            background-color: #28a745; /* Green for success */
+            background-color: #38a169; /* Tailwind: bg-green-600 */
+            transform: translateY(0px);
         }
         code {
-            background-color: #e9ecef;
-            padding: 2px 5px;
-            border-radius: 3px;
+            background-color: #edf2f7; /* Tailwind: bg-gray-200 */
+            padding: 0.25rem 0.5rem; /* Tailwind: px-2 py-1 */
+            border-radius: 0.25rem; /* Tailwind: rounded-md */
             font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
-            color: #c7254e; /* A reddish color for code */
+            color: #c53030; /* Tailwind: text-red-700 or similar for code */
+            font-size: 0.9em;
         }
         small {
-            font-size: 0.85em;
-            color: #6c757d;
+            font-size: 0.875rem; /* Tailwind: text-sm */
+            color: #718096; /* Tailwind: text-gray-600 */
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Welcome to the CodeStack API Portal</h1>
+    <!-- ADDED: Loader HTML -->
+    <div id="loader-wrapper">
+        <div class="loader"></div>
+    </div>
 
+    <div class="container"> <!-- Main content container -->
+        <h1>Welcome to the CodeStack API Portal</h1>
         <p>
             The CodeStack API provides a comprehensive set of endpoints for managing and sharing code snippets.
             It's designed to be robust, secure, and easy to integrate with various client applications.
         </p>
-
         <div class="links-section">
             <h2>Quick Links</h2>
             <ul>
@@ -150,6 +249,28 @@
     </div>
 
     <script>
+        window.addEventListener('load', function() {
+            const loaderWrapper = document.getElementById('loader-wrapper');
+            const container = document.querySelector('.container');
+
+            // Fade out loader
+            if (loaderWrapper) {
+                loaderWrapper.style.opacity = '0';
+                // After fade out transition, hide it completely
+                setTimeout(function() {
+                    loaderWrapper.style.display = 'none';
+                }, 500); // Matches loader transition duration
+            }
+
+            // Fade in main content
+            if (container) {
+                // Add a slight delay to ensure loader fade-out starts
+                setTimeout(function() {
+                    container.classList.add('loaded');
+                }, 100); // Small delay before container starts fading in
+            }
+        });
+
         function copyToClipboard(text, buttonElement) {
             if (!navigator.clipboard) {
                 // Fallback for older browsers
@@ -173,6 +294,7 @@
                 setCopied(buttonElement);
             }, function(err) {
                 console.error('Async: Could not copy text: ', err);
+                // Keep the alert for the async error case as it's more user-facing
                 alert('Failed to copy text. Please copy manually.');
             });
         }
