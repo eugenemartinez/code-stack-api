@@ -3,7 +3,7 @@
 use Slim\App;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Slim\Psr7\Stream;
+use Slim\Psr7\Stream; // Ensure Stream is imported
 
 return function (App $app) {
     // Home route - Serves the API portal page
@@ -49,6 +49,48 @@ return function (App $app) {
             return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
         }
     });
+
+    // --- Add these routes for local development serving of api-docs ---
+    // Serve api-docs.html for local development
+    $app->get('/api-docs.html', function (ServerRequestInterface $request, ResponseInterface $response) {
+        // Path from codestack/api/config/ (where this file is) to codestack/public/api-docs.html
+        $filePath = dirname(dirname(__DIR__)) . '/public/api-docs.html'; 
+        
+        if (file_exists($filePath)) {
+            $fileContent = file_get_contents($filePath);
+            if ($fileContent === false) {
+                $response->getBody()->write(json_encode(['error' => 'Could not read api-docs.html page.']));
+                return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
+            }
+            $response->getBody()->write($fileContent);
+            return $response->withHeader('Content-Type', 'text/html; charset=UTF-8');
+        } else {
+            $response->getBody()->write(json_encode(['error' => 'api-docs.html not found at: ' . $filePath]));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
+        }
+    });
+
+    // Serve openapi.yaml for local development (needed by api-docs.html)
+    $app->get('/openapi.yaml', function (ServerRequestInterface $request, ResponseInterface $response) {
+        // Path from codestack/api/config/ to codestack/public/openapi.yaml
+        $filePath = dirname(dirname(__DIR__)) . '/public/openapi.yaml';
+        
+        if (file_exists($filePath)) {
+            try {
+                $fileStream = new Stream(fopen($filePath, 'r'));
+                return $response->withBody($fileStream)
+                                ->withHeader('Content-Type', 'application/vnd.oai.openapi+yaml; charset=UTF-8'); 
+                                // Or 'application/x-yaml' or 'text/yaml'
+            } catch (\RuntimeException $e) {
+                $response->getBody()->write(json_encode(['error' => 'Could not open openapi.yaml: ' . $e->getMessage()]));
+                return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
+            }
+        } else {
+            $response->getBody()->write(json_encode(['error' => 'openapi.yaml not found at: ' . $filePath]));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(404);
+        }
+    });
+    // --- End of routes for local api-docs ---
 
     // Route for the API base path /api
     $app->get('/api', function (ServerRequestInterface $request, ResponseInterface $response) {
