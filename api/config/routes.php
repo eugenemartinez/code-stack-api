@@ -18,13 +18,20 @@ return function (App $app) {
             }
 
             // Determine the base URL
-            $uri = $request->getUri();
-            $scheme = $uri->getScheme();
-            $host = $uri->getHost();
-            $port = $uri->getPort();
-            $appBaseUrl = $scheme . '://' . $host;
-            if ($port && (($scheme === 'http' && $port !== 80) || ($scheme === 'https' && $port !== 443))) {
-                $appBaseUrl .= ':' . $port;
+            $appBaseUrl = '';
+            if (isset($_ENV['VERCEL_URL']) && !empty($_ENV['VERCEL_URL'])) {
+                // For Vercel, always use https and the VERCEL_URL (which is just the hostname)
+                $appBaseUrl = 'https://' . $_ENV['VERCEL_URL'];
+            } else {
+                // Fallback for local development or other environments
+                $uri = $request->getUri();
+                $scheme = $uri->getScheme();
+                $host = $uri->getHost();
+                $port = $uri->getPort();
+                $appBaseUrl = $scheme . '://' . $host;
+                if ($port && (($scheme === 'http' && $port !== 80) || ($scheme === 'https' && $port !== 443))) {
+                    $appBaseUrl .= ':' . $port;
+                }
             }
 
             // Replace placeholder
