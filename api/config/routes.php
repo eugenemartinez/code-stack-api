@@ -52,12 +52,27 @@ return function (App $app) {
 
     // Route for the API base path /api
     $app->get('/api', function (ServerRequestInterface $request, ResponseInterface $response) {
+        // Determine the base URL (same logic as '/' route)
+        $apiBaseUrl = '';
+        $appEnv = strtolower($_ENV['APP_ENV'] ?? 'development');
+
+        if ($appEnv === 'production' && isset($_ENV['PUBLIC_APP_BASE_URL']) && !empty($_ENV['PUBLIC_APP_BASE_URL'])) {
+            $apiBaseUrl = $_ENV['PUBLIC_APP_BASE_URL'];
+        } elseif (isset($_ENV['VERCEL_URL']) && !empty($_ENV['VERCEL_URL'])) {
+            $apiBaseUrl = 'https://' . $_ENV['VERCEL_URL'];
+        } else {
+            $uri = $request->getUri();
+            $scheme = $uri->getScheme();
+            $authority = $uri->getAuthority(); // Includes host and port if non-standard
+            $apiBaseUrl = $scheme . '://' . $authority;
+        }
+
         $payload = [
             'message' => 'Welcome to the CodeStack API base. Please use specific endpoints.',
             'available_categories' => [
-                $request->getUri()->getScheme() . '://' . $request->getUri()->getAuthority() . '/api/snippets',
-                $request->getUri()->getScheme() . '://' . $request->getUri()->getAuthority() . '/api/languages',
-                $request->getUri()->getScheme() . '://' . $request->getUri()->getAuthority() . '/api/tags'
+                $apiBaseUrl . '/api/snippets',
+                $apiBaseUrl . '/api/languages',
+                $apiBaseUrl . '/api/tags'
             ]
         ];
         $response->getBody()->write(json_encode($payload, JSON_PRETTY_PRINT));
