@@ -7,6 +7,11 @@
     }
   },
   "routes": [
+
+    {
+      "src": "api-docs.html",
+      "dest": "/public/api-docs.html"
+    },
     {
       "src": "/(.*)",
       "dest": "/api/index.php"
