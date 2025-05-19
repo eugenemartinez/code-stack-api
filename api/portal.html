@@ -46,12 +46,17 @@
             text-align: left;
             margin-top: 1rem;
             margin-bottom: 2rem;
-            opacity: 0; /* MODIFIED: Initially hidden */
-            transition: opacity 0.3s ease-in; /* Smooth fade-in for container */
+            opacity: 0; /* Initially hidden */
+            visibility: hidden; /* ADDED: Also hide from layout/interaction */
+            /* MODIFIED: Delay visibility change until opacity transition is done */
+            transition: opacity 0.3s ease-in, visibility 0s linear 0.3s;
         }
 
         .container.loaded { /* Class to make container visible */
             opacity: 1;
+            visibility: visible; /* Make it visible */
+            /* MODIFIED: Ensure opacity transition starts immediately, visibility follows */
+            transition-delay: 0s, 0s;
         }
 
 
@@ -204,7 +209,7 @@
     </style>
 </head>
 <body>
-    <!-- ADDED: Loader HTML -->
+    <!-- Loader HTML -->
     <div id="loader-wrapper">
         <div class="loader"></div>
     </div>
@@ -249,26 +254,36 @@
     </div>
 
     <script>
-        window.addEventListener('load', function() {
+        document.addEventListener('DOMContentLoaded', function() {
             const loaderWrapper = document.getElementById('loader-wrapper');
             const container = document.querySelector('.container');
+            // Minimum time (in milliseconds) the loader should be visible.
+            // Adjust this value as needed (e.g., 500ms = 0.5 seconds).
+            const minLoaderDisplayTime = 500;
 
-            // Fade out loader
-            if (loaderWrapper) {
-                loaderWrapper.style.opacity = '0';
-                // After fade out transition, hide it completely
-                setTimeout(function() {
-                    loaderWrapper.style.display = 'none';
-                }, 500); // Matches loader transition duration
+            function startPageTransition() {
+                // Fade out loader
+                if (loaderWrapper) {
+                    loaderWrapper.style.opacity = '0';
+                    // After fade out transition, hide it completely from layout
+                    setTimeout(function() {
+                        if (loaderWrapper) { // Check again in case it was removed
+                           loaderWrapper.style.display = 'none';
+                        }
+                    }, 500); // This duration should match the CSS transition-duration for #loader-wrapper opacity
+                }
+
+                // Fade in main content
+                if (container) {
+                    // Add a slight delay for a smoother visual handoff from loader to content
+                    setTimeout(function() {
+                        container.classList.add('loaded');
+                    }, 100); // Small delay before container starts fading in
+                }
             }
 
-            // Fade in main content
-            if (container) {
-                // Add a slight delay to ensure loader fade-out starts
-                setTimeout(function() {
-                    container.classList.add('loaded');
-                }, 100); // Small delay before container starts fading in
-            }
+            // Wait for at least minLoaderDisplayTime before starting the transition
+            setTimeout(startPageTransition, minLoaderDisplayTime);
         });
 
         function copyToClipboard(text, buttonElement) {
