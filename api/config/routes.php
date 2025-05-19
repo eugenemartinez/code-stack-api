@@ -19,8 +19,13 @@ return function (App $app) {
 
             // Determine the base URL
             $appBaseUrl = '';
-            if (isset($_ENV['VERCEL_URL']) && !empty($_ENV['VERCEL_URL'])) {
-                // For Vercel, always use https and the VERCEL_URL (which is just the hostname)
+            $appEnv = strtolower($_ENV['APP_ENV'] ?? 'development');
+
+            if ($appEnv === 'production' && isset($_ENV['PUBLIC_APP_BASE_URL']) && !empty($_ENV['PUBLIC_APP_BASE_URL'])) {
+                // Use the explicitly set public base URL for production
+                $appBaseUrl = $_ENV['PUBLIC_APP_BASE_URL'];
+            } elseif (isset($_ENV['VERCEL_URL']) && !empty($_ENV['VERCEL_URL'])) {
+                // For Vercel preview deployments or if PUBLIC_APP_BASE_URL is not set
                 $appBaseUrl = 'https://' . $_ENV['VERCEL_URL'];
             } else {
                 // Fallback for local development or other environments
