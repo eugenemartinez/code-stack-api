@@ -1,0 +1,76 @@
+# Composer
+/vendor/
+composer.lock # Typically committed, but some prefer to ignore if it causes merge conflicts often.
+              # If you commit composer.lock, remove this line.
+
+# Environment files
+.env
+.env.*.local
+.env.local
+
+# Log files and directories
+/logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+php_error.log
+error_log
+
+# Cache directories
+/cache/
+/tmp/
+/temp/
+/var/cache/ # Common Symfony/Slim cache location if using certain components
+
+# PHPUnit
+/coverage/
+phpunit.result.cache
+.phpunit.result.cache # PHPUnit 9+
+
+# IDE & Editor specific files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+nbproject/ # NetBeans
+*.swp
+*~
+*.bak
+*.orig
+
+# Operating System generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Build artifacts / Archives (if any are generated locally and not for commit)
+*.phar
+*.zip
+*.tar.gz
+*.rar
+
+# Local development tools / files
+Homestead.yaml
+Homestead.json
+Vagrantfile
+.vagrant/
+npm-debug.log
+yarn-error.log
+dump.rdb # Redis dump file
+
+# Sensitive files (though these should ideally not be in the project root anyway)
+*.key
+*.pem
+*.cer
+*.p12
+*.pfx
+secrets.*
+
+# If using PHP built-in server for local dev and it creates files
+.htrouter.php

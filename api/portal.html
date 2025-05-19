@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeStack API Portal</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            color: #1c1e21;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top for longer content */
+            min-height: 100vh;
+            padding-top: 40px; /* Add some top padding */
+            padding-bottom: 40px; /* Add some bottom padding */
+        }
+        .container {
+            max-width: 800px;
+            width: 90%; /* Responsive width */
+            background: #ffffff;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+        h1 {
+            color: #0d6efd; /* A nice blue */
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 2.2em;
+            font-weight: 600;
+        }
+        h2 {
+            color: #343a40;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.6em;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 8px;
+        }
+        p {
+            margin-bottom: 12px;
+            color: #495057;
+        }
+        a {
+            color: #0d6efd;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        a:hover {
+            text-decoration: underline;
+            color: #0a58ca;
+        }
+        .links-section ul {
+            list-style: none;
+            padding: 0;
+        }
+        .links-section li {
+            margin-bottom: 20px;
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            transition: box-shadow 0.2s ease-in-out;
+        }
+        .links-section li:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .links-section li strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #212529;
+            font-size: 1.1em;
+        }
+        .copy-button {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            font-size: 0.8em;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 8px;
+            transition: background-color 0.2s ease;
+        }
+        .copy-button:hover {
+            background-color: #5a6268;
+        }
+        .copy-button.copied {
+            background-color: #28a745; /* Green for success */
+        }
+        code {
+            background-color: #e9ecef;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            color: #c7254e; /* A reddish color for code */
+        }
+        small {
+            font-size: 0.85em;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to the CodeStack API Portal</h1>
+
+        <p>
+            The CodeStack API provides a comprehensive set of endpoints for managing and sharing code snippets.
+            It's designed to be robust, secure, and easy to integrate with various client applications.
+        </p>
+
+        <div class="links-section">
+            <h2>Quick Links</h2>
+            <ul>
+                <li>
+                    <strong>Interactive API Documentation (Swagger UI):</strong>
+                    <p>Explore all available endpoints, view request/response schemas, and try out the API directly in your browser.</p>
+                    <p><a href="/api-docs.html" target="_blank" rel="noopener">View API Documentation</a></p>
+                </li>
+                <li>
+                    <strong>Postman Collection (from GitHub):</strong>
+                    <p>Download our Postman collection and environment directly from the GitHub repository to easily test all API endpoints.</p>
+                    <p><a href="https://raw.githubusercontent.com/eugenemartinez/code-stack-api/main/postman/CodeStack_API.postman_collection.json" target="_blank" rel="noopener noreferrer" download="CodeStack_API.postman_collection.json">Download Postman Collection</a></p>
+                    <p><a href="https://raw.githubusercontent.com/eugenemartinez/code-stack-api/main/postman/CodeStack_Local_Dev.postman_environment.json" target="_blank" rel="noopener noreferrer" download="CodeStack_Local_Dev.postman_environment.json">Download Local Dev Environment for Postman</a></p>
+                    <p><small>Alternatively, you can <a href="https://github.com/eugenemartinez/code-stack-api/tree/main/postman" target="_blank" rel="noopener noreferrer">browse the Postman folder on GitHub</a>.</small></p>
+                </li>
+                <li>
+                    <strong>API Base URL:</strong>
+                    <p>
+                        The API base for specific endpoints (e.g., /snippets) is:
+                        <code id="apiBaseUrlText">{{APP_BASE_URL}}/api</code>
+                        <button class="copy-button" onclick="copyToClipboard('{{APP_BASE_URL}}/api', this)">Copy</button>
+                    </p>
+                    <p>The portal itself is at: <a href="{{APP_BASE_URL}}/" target="_blank" rel="noopener">{{APP_BASE_URL}}/</a></p>
+                </li>
+                <li>
+                    <strong>Project Repository & Getting Started (GitHub):</strong>
+                    <p>View the source code, report issues, contribute to the project, or find detailed setup instructions in our README.</p>
+                    <p><a href="https://github.com/eugenemartinez/code-stack-api" target="_blank" rel="noopener">View on GitHub (includes README)</a></p>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function copyToClipboard(text, buttonElement) {
+            if (!navigator.clipboard) {
+                // Fallback for older browsers
+                try {
+                    const textArea = document.createElement("textarea");
+                    textArea.value = text;
+                    textArea.style.position = "fixed"; // Prevent scrolling to bottom
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    setCopied(buttonElement);
+                } catch (err) {
+                    console.error('Fallback: Oops, unable to copy', err);
+                    alert('Failed to copy text. Please copy manually.');
+                }
+                return;
+            }
+            navigator.clipboard.writeText(text).then(function() {
+                setCopied(buttonElement);
+            }, function(err) {
+                console.error('Async: Could not copy text: ', err);
+                alert('Failed to copy text. Please copy manually.');
+            });
+        }
+
+        function setCopied(buttonElement) {
+            const originalText = buttonElement.innerText;
+            buttonElement.innerText = 'Copied!';
+            buttonElement.classList.add('copied');
+            setTimeout(() => {
+                buttonElement.innerText = originalText;
+                buttonElement.classList.remove('copied');
+            }, 2000); // Reset after 2 seconds
+        }
+    </script>
+</body>
+</html>

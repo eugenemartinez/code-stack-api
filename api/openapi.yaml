@@ -1,0 +1,705 @@
+openapi: 3.0.0
+info:
+  title: CodeStack API
+  version: v1.0.0
+  description: API for managing code snippets.
+
+servers:
+  - url: http://localhost:8000 # Or your actual local dev server URL
+    description: Local development server
+  - url: https://code-stack-api.vercel.app # Replace with your actual Vercel URL
+    description: Production server on Vercel
+  # Add other servers like staging or production later
+
+paths:
+  /api/snippets:
+    post:
+      summary: Create a new code snippet
+      description: Adds a new code snippet to the collection.
+      operationId: createSnippet
+      tags:
+        - Snippets
+      requestBody:
+        description: Snippet object that needs to to be added
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SnippetInput'
+      responses:
+        '201':
+          description: Snippet created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Snippet'
+        '400':
+          description: Invalid input provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorValidation'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get: # New GET definition for listing snippets
+      summary: List all code snippets
+      description: Retrieves a paginated list of code snippets, with options for searching, filtering, and sorting.
+      operationId: listSnippets
+      tags:
+        - Snippets
+      parameters:
+        - name: search
+          in: query
+          required: false
+          description: Term to search for in title, description, or username.
+          schema:
+            type: string
+            # example: "hello world" # Consider removing or making very generic
+        - name: page
+          in: query
+          required: false
+          description: Page number for pagination.
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+            example: 1
+        - name: per_page
+          in: query
+          required: false
+          description: Number of items per page.
+          schema:
+            type: integer
+            default: 15
+            minimum: 1
+            maximum: 100 # As per your action's logic
+            example: 10
+        - name: language
+          in: query
+          required: false
+          description: Filter snippets by programming language.
+          schema:
+            type: string
+            # example: "php" # Consider removing or making very generic
+        - name: tag
+          in: query
+          required: false
+          description: Filter snippets by a specific tag.
+          schema:
+            type: string
+            # example: "api" # Consider removing or making very generic
+        - name: sort_by
+          in: query
+          required: false
+          description: Field to sort snippets by.
+          schema:
+            type: string
+            default: "created_at"
+            enum: ["created_at", "updated_at", "title", "language", "username"]
+            example: "created_at" # Default sort is fine
+        - name: order
+          in: query
+          required: false
+          description: Sort order.
+          schema:
+            type: string
+            default: "desc"
+            enum: ["asc", "desc"]
+            example: "desc" # Default order is fine
+      responses:
+        '200':
+          description: A paginated list of snippets.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSnippetList'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/snippets/batch-get: # Changed from /api/snippets/batch
+    post:
+      summary: Get multiple code snippets by their IDs
+      description: Retrieves a list of code snippets based on an array of provided IDs.
+      operationId: getSnippetsBatch # This operationId might also be more descriptive as getSnippetsBatchGet
+      tags:
+        - Snippets
+      requestBody:
+        description: An array of snippet IDs to retrieve.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchGetSnippetsInput'
+      responses:
+        '200':
+          description: Snippets retrieved successfully. Returns an array of snippets. If the input 'ids' array was empty, an empty array is returned.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Snippet' # Each item is a full Snippet object
+        '400':
+          description: Bad request - Missing or invalid 'ids' field, or no valid snippet IDs provided.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error' # Generic error for these cases
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithDetails' # Uses the schema with 'details'
+  /api/snippets/random: # New path for getting a random snippet
+    get:
+      summary: Get a random code snippet
+      description: Retrieves a single code snippet selected randomly from the collection.
+      operationId: getRandomSnippet
+      tags:
+        - Snippets
+      responses:
+        '200':
+          description: Random snippet retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Snippet' # Returns the full snippet details
+        '404':
+          description: No snippets available in the database.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error with details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithDetails' # Changed from Error to ErrorWithDetails
+  /api/snippets/{id}:
+    get:
+      summary: Get a specific code snippet by ID
+      description: Retrieves a single code snippet based on its unique ID.
+      operationId: getSnippetById
+      tags:
+        - Snippets
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique identifier of the snippet to retrieve.
+          schema:
+            type: string
+            format: uuid # Indicates it's a UUID
+            example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+      responses:
+        '200':
+          description: Snippet retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Snippet' # Reuses the Snippet schema
+        '400':
+          description: Invalid ID format supplied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error' # Generic error for bad ID format
+        '404':
+          description: Snippet not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error' # Generic error for not found
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error' # Generic error for DB issues
+    put: # New PUT definition for this path
+      summary: Update an existing code snippet
+      description: Updates an existing code snippet. Only provided fields will be updated. Requires a valid modification_code.
+      operationId: updateSnippetById
+      tags:
+        - Snippets
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique identifier of the snippet to update.
+          schema:
+            type: string
+            format: uuid
+            example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+      requestBody:
+        description: Snippet object with fields to update. `modification_code` is always required.
+        required: true # The request body itself is required
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SnippetUpdateInput'
+      responses:
+        '200':
+          description: Snippet updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Snippet' # Returns the full updated snippet
+        '400':
+          description: Invalid input, ID format, or no updatable fields provided.
+          content:
+            application/json:
+              schema:
+                # Can be ErrorValidation for field errors, or Error for general 400s
+                oneOf:
+                  - $ref: '#/components/schemas/ErrorValidation'
+                  - $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - Invalid modification_code.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Snippet not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete: # New DELETE definition for this path
+      summary: Delete a code snippet
+      description: Deletes a specific code snippet. Requires a valid modification_code.
+      operationId: deleteSnippetById
+      tags:
+        - Snippets
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique identifier of the snippet to delete.
+          schema:
+            type: string
+            format: uuid
+            example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+      requestBody:
+        description: Object containing the modification_code required for deletion.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SnippetDeleteInput'
+      responses:
+        '204':
+          description: Snippet deleted successfully. No content returned.
+        '400':
+          description: Invalid input, ID format, or modification_code validation failed.
+          content:
+            application/json:
+              schema:
+                # Can be ErrorValidation for mod code errors, or Error for general 400s (like bad ID)
+                oneOf:
+                  - $ref: '#/components/schemas/ErrorValidation'
+                  - $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - Invalid modification_code.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Snippet not found or failed to delete (e.g., already deleted).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/snippets/{id}/verify-modification-code: # New path
+    post:
+      summary: Verify the modification code for a snippet
+      description: Checks if the provided modification code is valid for the given snippet ID.
+      operationId: verifySnippetModificationCode
+      tags:
+        - Snippets
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique identifier of the snippet.
+          schema:
+            type: string
+            format: uuid # Action validates this
+            example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+      requestBody:
+        description: Object containing the modification_code to verify.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModificationCodeInput'
+      responses:
+        '200':
+          description: Verification result. `verified` is true if the code matches, false otherwise. A `reason` may be provided if `verified` is false due to input issues or snippet not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationResult'
+        '500':
+          description: Internal server error during verification.
+          content:
+            application/json:
+              schema:
+                # This also returns verified: false and a reason
+                $ref: '#/components/schemas/VerificationResult'
+  /api/tags: # New path for listing all unique tags
+    get:
+      summary: List all unique tags
+      description: Retrieves a list of all unique tags currently associated with any code snippet, sorted alphabetically.
+      operationId: listTags
+      tags:
+        - Meta # Or "Tags" if you prefer a dedicated tag for tag-related operations
+      responses:
+        '200':
+          description: A list of unique tags retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  description: A unique tag.
+                example: ["css", "html", "javascript", "php", "python", "sql"]
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithDetails' # As the action includes 'details'
+  /api/languages: # New path for listing all unique languages
+    get:
+      summary: List all unique programming languages
+      description: Retrieves a list of all unique programming languages currently associated with any code snippet, sorted alphabetically.
+      operationId: listLanguages
+      tags:
+        - Meta # Grouped with other meta information
+      responses:
+        '200':
+          description: A list of unique programming languages retrieved successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  description: A unique programming language.
+                example: ["php", "javascript", "python", "java", "csharp"]
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorWithDetails' # As the action includes 'details'
+
+components:
+  schemas:
+    SnippetInput:
+      type: object
+      required:
+        - title
+        - code
+        - language
+      properties:
+        title:
+          type: string
+          description: The title of the snippet.
+          minLength: 1
+          maxLength: 255
+          example: "Hello World in PHP"
+        description:
+          type: string
+          nullable: true
+          description: A brief description of the snippet.
+          maxLength: 1000
+          example: "A simple PHP script to output Hello World."
+        code:
+          type: string
+          description: The actual code content.
+          example: "<?php echo 'Hello World';"
+        language:
+          type: string
+          description: The programming language of the snippet.
+          minLength: 1
+          maxLength: 50
+          example: "php"
+        tags:
+          type: array
+          nullable: true
+          description: A list of tags associated with the snippet.
+          items:
+            type: string
+            minLength: 1
+            maxLength: 50
+          example: ["php", "beginner", "greeting"]
+        username:
+          type: string
+          nullable: true
+          description: The username of the author. If not provided, one will be generated.
+          minLength: 1
+          maxLength: 50
+          example: "CodeMaster7"
+
+    Snippet: # This is the response schema when a snippet is created or retrieved
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the snippet.
+          example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+        title:
+          type: string
+          example: "Hello World in PHP"
+        description:
+          type: string
+          nullable: true
+          example: "A simple PHP script to output Hello World."
+        username:
+          type: string
+          example: "AgileCoder" # Could be user-provided or generated
+        language:
+          type: string
+          example: "php"
+        code:
+          type: string
+          example: "<?php echo 'Hello World';"
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["php", "beginner", "greeting"]
+        modification_code:
+          type: string
+          description: A short code required to modify or delete the snippet.
+          example: "mod123abc456"
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp of when the snippet was created.
+          example: "2025-05-19T10:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          description: Timestamp of when the snippet was last updated.
+          example: "2025-05-19T10:00:00Z"
+
+    ErrorValidation: # For 400 errors with specific field validation messages
+      type: object
+      properties:
+        errors:
+          type: object
+          additionalProperties: # Allows for dynamic field names like 'title', 'code'
+            type: array
+            items:
+              type: string
+          example:
+            title: ["Title cannot be empty.", "Title must have a length between 1 and 255"]
+            language: ["Language cannot be empty."]
+
+    Error: # General error model for 500 or other simple errors
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Internal Server Error: Could not process request."
+
+    SnippetUpdateInput: # New schema for PUT request body
+      type: object
+      required: # Only modification_code is strictly required in the payload for the request to be processed
+        - modification_code
+      properties:
+        title:
+          type: string
+          description: The new title of the snippet.
+          minLength: 1
+          maxLength: 255
+          example: "Updated Hello World in PHP"
+        description:
+          type: string
+          nullable: true
+          description: The new brief description of the snippet.
+          maxLength: 1000
+          example: "An updated simple PHP script."
+        code:
+          type: string
+          description: The new code content.
+          example: "<?php echo 'Updated Hello World!';"
+        language:
+          type: string
+          description: The new programming language of the snippet.
+          minLength: 1
+          maxLength: 50
+          example: "php"
+        tags:
+          type: array
+          nullable: true
+          description: The new list of tags associated with the snippet. Replaces existing tags.
+          items:
+            type: string
+            minLength: 1
+            maxLength: 50
+          example: ["php", "updated", "greeting"]
+        modification_code: # This is always required for an update
+          type: string
+          description: The modification code required to update the snippet.
+          pattern: '^[a-zA-Z0-9]{12}$'  # Added for consistency
+          minLength: 12 
+          maxLength: 12 
+          example: "modCode12345"
+
+    SnippetDeleteInput: # New schema for DELETE request body
+      type: object
+      required:
+        - modification_code
+      properties:
+        modification_code:
+          type: string
+          description: The modification code required to delete the snippet.
+          pattern: '^[a-zA-Z0-9]{12}$' # Alphanumeric, exactly 12 characters
+          minLength: 12 # Redundant with pattern but good for some tools
+          maxLength: 12 # Redundant with pattern but good for some tools
+          example: "delCode56789"
+
+    SnippetSummary: # Schema for snippets in a list view (omits 'code' and 'modification_code')
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+        title:
+          type: string
+          example: "Hello World in PHP"
+        description:
+          type: string
+          nullable: true
+          example: "A simple PHP script to output Hello World."
+        username:
+          type: string
+          example: "AgileCoder"
+        language:
+          type: string
+          example: "php"
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["php", "beginner", "greeting"]
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-05-19T10:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2025-05-19T10:00:00Z"
+
+    Pagination:
+      type: object
+      properties:
+        current_page:
+          type: integer
+          example: 1
+        per_page:
+          type: integer
+          example: 15
+        total_pages:
+          type: integer
+          example: 10
+        total_items:
+          type: integer
+          example: 150
+        items_on_page:
+          type: integer
+          example: 15
+
+    PaginatedSnippetList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/SnippetSummary' # Use the summary schema
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    ErrorWithDetails: # New schema for errors that include a details field
+      type: object
+      properties:
+        error:
+          type: string
+          description: A summary of the error.
+          example: "Failed to retrieve random snippet"
+        details:
+          type: string
+          description: Specific details about the error, often the exception message.
+          example: "Database query failed unexpectedly"
+
+    BatchGetSnippetsInput: # New schema for batch get request body
+      type: object
+      required:
+        - ids
+      properties:
+        ids:
+          type: array
+          description: An array of snippet UUIDs.
+          items:
+            type: string
+            format: uuid
+            example: "a1b2c3d4-e5f6-7890-1234-567890abcdef"
+          minItems: 0 # Allows an empty array, which the action handles by returning 200 with []
+          example: ["a1b2c3d4-e5f6-7890-1234-567890abcdef", "b2c3d4e5-f6a7-8901-2345-67890abcdef1"]
+
+    ModificationCodeInput: # New schema for the request body
+      type: object
+      required:
+        - modification_code
+      properties:
+        modification_code:
+          type: string
+          description: The modification code to verify.
+          pattern: '^[a-zA-Z0-9]{12}$' # As per typical mod code validation
+          example: "modCode12345"
+
+    VerificationResult: # New schema for the response
+      type: object
+      required:
+        - verified
+      properties:
+        verified:
+          type: boolean
+          description: True if the modification code is valid for the snippet, false otherwise.
+          example: true
+        reason:
+          type: string
+          nullable: true # Reason is not always present
+          description: An optional reason if verification failed (e.g., "Invalid snippet ID format", "Missing modification_code", "Database error").
+          example: "Invalid snippet ID format"
