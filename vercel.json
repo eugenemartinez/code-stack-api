@@ -7,6 +7,14 @@
   },
   "rewrites": [
     {
+      "source": "^/api-docs\\.html$",
+      "destination": "/api/api-docs.html"
+    },
+    {
+      "source": "^/openapi\\.yaml$",
+      "destination": "/api/openapi.yaml"
+    },
+    {
       "source": "/(.*)",
       "destination": "/api/index.php"
     }
