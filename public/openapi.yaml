@@ -1,15 +1,15 @@
 openapi: 3.0.0
 info:
   title: CodeStack API
-  version: v1.0.0
+  version: v1
   description: API for managing code snippets.
 
 servers:
-  - url: http://localhost:8000 # Or your actual local dev server URL
+  - url: https://code-stack-api.vercel.app
+    description: Production server (Vercel)
+  - url: http://localhost:8000 # Or your local PHP dev server URL if different
     description: Local development server
-  - url: https://code-stack-api.vercel.app # Replace with your actual Vercel URL
-    description: Production server on Vercel
-  # Add other servers like staging or production later
+  # You can add more servers if needed
 
 paths:
   /api/snippets:
