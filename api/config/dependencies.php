@@ -61,12 +61,6 @@ return function (string $projectRoot): Container {
         // Determine if we are in a testing environment
         $isTesting = ($_ENV['TESTING'] ?? 'false') === 'true' || strtolower($_ENV['APP_ENV'] ?? '') === 'testing';
 
-        $logger = null; // Initialize logger variable
-        // Attempt to get logger if available, for logging potential config issues
-        // Note: 'this' inside a PHP-DI factory refers to the container itself.
-        // We need to check if the factory is being executed within a container context that has LoggerInterface.
-        // For simplicity, we'll assume it might not be available during early DI setup for this specific check.
-
         if ($isTesting) {
             // Use test database configuration
             $dbHost = $_ENV['DB_HOST_TEST'] ?? null;
@@ -74,6 +68,7 @@ return function (string $projectRoot): Container {
             $dbUser = $_ENV['DB_USER_TEST'] ?? null;
             $dbPass = $_ENV['DB_PASS_TEST'] ?? null;
             $dbPort = $_ENV['DB_PORT_TEST'] ?? '5432'; // Default PostgreSQL port
+            $sslmode = 'prefer'; // Or 'disable' for local test DB if not using SSL
 
             if (empty($dbName) || empty($dbHost) || empty($dbUser)) {
                 $errorMessage = 'Critical test database configuration (DB_HOST_TEST, DB_NAME_TEST, DB_USER_TEST) is missing from the environment.';
@@ -93,6 +88,7 @@ return function (string $projectRoot): Container {
                 $dbUser = $_ENV['DB_USER_PROD'] ?? null;
                 $dbPass = $_ENV['DB_PASS_PROD'] ?? null;
                 $dbPort = $_ENV['DB_PORT_PROD'] ?? '5432'; // Default PostgreSQL port
+                $sslmode = 'require'; // Crucial for Neon DB
 
                 if (empty($dbName) || empty($dbHost) || empty($dbUser)) {
                     $errorMessage = 'Critical production database configuration (DB_HOST_PROD, DB_NAME_PROD, DB_USER_PROD) is missing from the environment.';
@@ -107,6 +103,7 @@ return function (string $projectRoot): Container {
                 $dbUser = $_ENV['DB_USER'] ?? null;
                 $dbPass = $_ENV['DB_PASS'] ?? null;
                 $dbPort = $_ENV['DB_PORT'] ?? '5432'; // Default PostgreSQL port
+                $sslmode = 'prefer'; // Or 'disable' for local dev DB if not using SSL
 
                 if (empty($dbName) || empty($dbHost) || empty($dbUser)) {
                     $errorMessage = 'Critical database configuration (DB_HOST, DB_NAME, DB_USER) is missing from the environment.';
@@ -119,12 +116,17 @@ return function (string $projectRoot): Container {
         // Construct DSN for PostgreSQL
         // User and password should NOT be in the DSN string for PDO with pgsql,
         // they are passed as separate arguments to the PDO constructor.
-        $dsn = "pgsql:host={$dbHost};port={$dbPort};dbname={$dbName}";
+        $dsn = "pgsql:host={$dbHost};port={$dbPort};dbname={$dbName};sslmode={$sslmode}";
         
         try {
-            $pdo = new PDO($dsn, $dbUser, $dbPass); // Pass user and pass separately
-            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            $pdoOptions = [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            ];
+            // For some drivers/versions, SSL options might need to be passed in $pdoOptions
+            // However, for pgsql, including sslmode in the DSN string is standard.
+
+            $pdo = new PDO($dsn, $dbUser, $dbPass, $pdoOptions);
             return $pdo;
         } catch (\PDOException $e) {
             // Log the specific DSN or connection details (without password) if possible

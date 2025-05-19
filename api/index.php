@@ -10,29 +10,39 @@ use Slim\Factory\AppFactory;
 // If all routes (including '/') are moved or are Actions, these can be removed from here.
 
 // Define project root based on the location of this file
-$projectRoot = dirname(__DIR__); 
+$projectRoot = dirname(__DIR__);
 
 require $projectRoot . '/vendor/autoload.php';
 
-// Load .env file
-$dotenv = Dotenv\Dotenv::createImmutable($projectRoot);
-$dotenv->load(); 
+// Load .env file conditionally
+// In production (like Vercel), environment variables are set directly in the platform.
+// .env file is primarily for local development.
+if (file_exists($projectRoot . '/.env')) {
+    $dotenv = Dotenv\Dotenv::createImmutable($projectRoot);
+    $dotenv->load();
+}
+// Or, if using phpdotenv v5+:
+// $dotenv = Dotenv\Dotenv::createImmutable($projectRoot);
+// $dotenv->safeLoad();
+
 
 // --- DI Container Setup ---
-$containerBuilder = require __DIR__ . '/config/dependencies.php';
-$container = $containerBuilder($projectRoot); 
+// Assuming your dependencies.php returns a callable that expects $projectRoot
+// and returns a configured container.
+/** @var \Psr\Container\ContainerInterface $container */
+$container = (require __DIR__ . '/config/dependencies.php')($projectRoot);
 
 // Set container to create App with on AppFactory
 AppFactory::setContainer($container);
 $app = AppFactory::create();
 
 // --- Middleware Configuration ---
-$middlewareRegistrar = require __DIR__ . '/config/middleware.php';
-$middlewareRegistrar($app);
+// Assuming your middleware.php returns a callable that expects the App instance.
+(require __DIR__ . '/config/middleware.php')($app);
 
 // --- Route Definitions ---
-$routeRegistrar = require __DIR__ . '/config/routes.php';
-$routeRegistrar($app);
+// Assuming your routes.php returns a callable that expects the App instance.
+(require __DIR__ . '/config/routes.php')($app);
 
 // Run the app
 $app->run();
