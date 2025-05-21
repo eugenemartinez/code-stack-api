@@ -3,9 +3,19 @@
 use Slim\App;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Slim\Psr7\Stream; // Ensure Stream is imported
+use Slim\Psr7\Stream;
+use Slim\Routing\RouteCollectorProxy;
+use Predis\Client as PredisClient; // For Redis
+use Psr\Log\LoggerInterface; // To get logger for other parts if needed, not for RateLimitMiddleware constructor
+
+// Directly include your RateLimitMiddleware file.
+// Adjust path if RateLimitMiddleware.php is not in the parent directory of this config file (i.e., not in api/)
+// This ensures the class is loaded if Composer autoloading isn't picking it up for global namespace classes.
+require_once dirname(__DIR__) . '/RateLimitMiddleware.php';
 
 return function (App $app) {
+    $container = $app->getContainer(); // Get container
+
     // Home route - Serves the API portal page
     $app->get('/', function (ServerRequestInterface $request, ResponseInterface $response) {
         $portalPath = dirname(__DIR__) . '/portal.html'; // portal.html is in api/
@@ -92,64 +102,87 @@ return function (App $app) {
     });
     // --- End of routes for local api-docs ---
 
-    // Route for the API base path /api
-    $app->get('/api', function (ServerRequestInterface $request, ResponseInterface $response) {
-        // Determine the base URL (same logic as '/' route)
-        $apiBaseUrl = '';
-        $appEnv = strtolower($_ENV['APP_ENV'] ?? 'development');
-
-        if ($appEnv === 'production' && isset($_ENV['PUBLIC_APP_BASE_URL']) && !empty($_ENV['PUBLIC_APP_BASE_URL'])) {
-            $apiBaseUrl = $_ENV['PUBLIC_APP_BASE_URL'];
-        } elseif (isset($_ENV['VERCEL_URL']) && !empty($_ENV['VERCEL_URL'])) {
-            $apiBaseUrl = 'https://' . $_ENV['VERCEL_URL'];
-        } else {
-            $uri = $request->getUri();
-            $scheme = $uri->getScheme();
-            $authority = $uri->getAuthority(); // Includes host and port if non-standard
-            $apiBaseUrl = $scheme . '://' . $authority;
+    // Instantiate RateLimitMiddleware
+    $redisClient = null;
+    if (!empty($_ENV['REDIS_URL'])) {
+        try {
+            $redisDsn = $_ENV['REDIS_URL'];
+            if (strpos($redisDsn, 'redis://') !== 0 && strpos($redisDsn, 'rediss://') !== 0) {
+                $redisDsn = 'redis://' . $redisDsn;
+            }
+            $redisClient = new PredisClient($redisDsn, ['timeout' => 0.5]);
+            $redisClient->connect();
+        } catch (Exception $e) {
+            // Log this error if you have a logger available via container
+            if ($container->has(LoggerInterface::class)) {
+                $logger = $container->get(LoggerInterface::class);
+                $logger->error("Failed to connect to Redis for rate limiting in routes.php: " . $e->getMessage(), ['exception' => $e]);
+            } else {
+                error_log("Failed to connect to Redis for rate limiting in routes.php: " . $e->getMessage());
+            }
+            $redisClient = null; // Fallback
         }
+    }
 
-        $payload = [
-            'message' => 'Welcome to the CodeStack API base. Please use specific endpoints.',
-            'available_categories' => [
-                $apiBaseUrl . '/api/snippets',
-                $apiBaseUrl . '/api/languages',
-                $apiBaseUrl . '/api/tags'
-            ]
-        ];
-        // Add JSON_UNESCAPED_SLASHES to prevent escaping of forward slashes
-        $response->getBody()->write(json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-        return $response->withHeader('Content-Type', 'application/json');
+    $rateLimitMiddleware = new RateLimitMiddleware(
+        (int)($_ENV['RATE_LIMIT_CUD_REQUESTS'] ?? 50),
+        (int)($_ENV['RATE_LIMIT_CUD_WINDOW_SECONDS'] ?? 86400),
+        $redisClient
+    );
+
+    // Group API routes
+    $app->group('/api', function (RouteCollectorProxy $group) use ($rateLimitMiddleware) {
+        // Route for the API base path /api
+        $group->get('', function (ServerRequestInterface $request, ResponseInterface $response) {
+            // Determine the base URL (same logic as '/' route)
+            $apiBaseUrl = '';
+            $appEnv = strtolower($_ENV['APP_ENV'] ?? 'development');
+
+            if ($appEnv === 'production' && isset($_ENV['PUBLIC_APP_BASE_URL']) && !empty($_ENV['PUBLIC_APP_BASE_URL'])) {
+                $apiBaseUrl = $_ENV['PUBLIC_APP_BASE_URL'];
+            } elseif (isset($_ENV['VERCEL_URL']) && !empty($_ENV['VERCEL_URL'])) {
+                $apiBaseUrl = 'https://' . $_ENV['VERCEL_URL'];
+            } else {
+                $uri = $request->getUri();
+                $scheme = $uri->getScheme();
+                $authority = $uri->getAuthority(); // Includes host and port if non-standard
+                $apiBaseUrl = $scheme . '://' . $authority;
+            }
+
+            $payload = [
+                'message' => 'Welcome to the CodeStack API base. Please use specific endpoints.',
+                'available_categories' => [
+                    $apiBaseUrl . '/api/snippets',
+                    $apiBaseUrl . '/api/languages',
+                    $apiBaseUrl . '/api/tags'
+                ]
+            ];
+            $response->getBody()->write(json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+            return $response->withHeader('Content-Type', 'application/json');
+        });
+
+        // Publicly accessible GET routes (not rate-limited by this specific middleware)
+        $group->get('/snippets', \App\Actions\Snippets\ListSnippetsAction::class);
+        $group->get('/snippets/random', \App\Actions\Snippets\GetRandomSnippetAction::class); // Must be before /snippets/{id}
+        $group->get('/snippets/{id}', \App\Actions\Snippets\GetSnippetAction::class);
+        $group->get('/languages', \App\Actions\Meta\ListLanguagesAction::class);
+        $group->get('/tags', \App\Actions\Meta\ListTagsAction::class);
+        $group->post('/snippets/batch-get', \App\Actions\Snippets\BatchGetSnippetsAction::class); // Not rate-limited as per PRD
+
+        // Routes that require rate limiting
+        $group->post('/snippets', \App\Actions\Snippets\CreateSnippetAction::class)
+            ->add($rateLimitMiddleware);
+
+        $group->put('/snippets/{id}', \App\Actions\Snippets\UpdateSnippetAction::class)
+            ->add($rateLimitMiddleware);
+
+        $group->delete('/snippets/{id}', \App\Actions\Snippets\DeleteSnippetAction::class)
+            ->add($rateLimitMiddleware);
+
+        $group->post('/snippets/{id}/verify-modification-code', \App\Actions\Snippets\VerifyModificationCodeAction::class)
+            ->add($rateLimitMiddleware);
     });
 
-    // Create Snippet
-    $app->post('/api/snippets', \App\Actions\Snippets\CreateSnippetAction::class);
-
-    // Get all snippets (List Snippets)
-    $app->get('/api/snippets', \App\Actions\Snippets\ListSnippetsAction::class);
-
-    // Get a single random public snippet
-    // THIS ROUTE MUST BE DEFINED BEFORE /api/snippets/{id}
-    $app->get('/api/snippets/random', \App\Actions\Snippets\GetRandomSnippetAction::class);
-
-    // Get a Single Snippet by ID
-    $app->get('/api/snippets/{id}', \App\Actions\Snippets\GetSnippetAction::class);
-
-    // Update Snippet
-    $app->put('/api/snippets/{id}', \App\Actions\Snippets\UpdateSnippetAction::class);
-
-    // Delete Snippet
-    $app->delete('/api/snippets/{id}', \App\Actions\Snippets\DeleteSnippetAction::class);
-
-    // Get unique languages
-    $app->get('/api/languages', \App\Actions\Meta\ListLanguagesAction::class);
-
-    // Get unique tags
-    $app->get('/api/tags', \App\Actions\Meta\ListTagsAction::class);
-
-    // Batch get snippets by IDs
-    $app->post('/api/snippets/batch-get', \App\Actions\Snippets\BatchGetSnippetsAction::class);
-
-    // Verify modification code for a snippet
-    $app->post('/api/snippets/{id}/verify-modification-code', \App\Actions\Snippets\VerifyModificationCodeAction::class);
+    // Fallback for any other /api routes not matched (optional, if you have an ApiNotFoundAction)
+    // $app->map(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], '/api[/{params:.*}]', \App\Actions\General\ApiNotFoundAction::class);
 };

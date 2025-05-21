@@ -1,20 +1,19 @@
 <?php
 
-require_once __DIR__ . '/../RateLimitMiddleware.php'; 
+// require_once __DIR__ . '/../RateLimitMiddleware.php'; // This might not be needed if using Composer autoload
 
 use Slim\App;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface; // Keep for error handler
+use Psr\Http\Message\ResponseInterface; // Keep for error handler
 use Tuupola\Middleware\CorsMiddleware;
 use Psr\Log\LoggerInterface;
-use RateLimitMiddleware;
 
 return function (App $app) {
-    $container = $app->getContainer(); // Get the container
+    $container = $app->getContainer();
 
     // Add Slim Built-in Middleware
-    $app->addBodyParsingMiddleware(); 
-    $app->addRoutingMiddleware();     
+    $app->addBodyParsingMiddleware();
+    $app->addRoutingMiddleware();
 
     // --- Add CORS Middleware ---
     // Read allowed origins from environment variable
@@ -45,37 +44,18 @@ return function (App $app) {
     }
 
     $app->add(new CorsMiddleware([
-        "origin" => $allowedOrigins, 
-        "methods" => ["GET", "POST", "PUT", "PATCH", "DELETE"], 
-        "headers.allow" => ["Content-Type", "Authorization", "X-Requested-With"], 
-        "headers.expose" => [], 
-        "credentials" => false, 
-        "cache" => 0, 
+        "origin" => $allowedOrigins,
+        "methods" => ["GET", "POST", "PUT", "PATCH", "DELETE"],
+        "headers.allow" => ["Content-Type", "Authorization", "X-Requested-With"],
+        "headers.expose" => [],
+        "credentials" => false,
+        "cache" => 0,
         "logger" => $container->has(LoggerInterface::class) ? $container->get(LoggerInterface::class) : null,
     ]));
 
-    // --- Configure and Add Rate Limiting Middleware ---
-    $redisClient = null;
-    if (!empty($_ENV['REDIS_URL'])) {
-        try {
-            $redisClient = new Predis\Client($_ENV['REDIS_URL'], ['timeout' => 0.5]);
-            $redisClient->connect(); 
-        } catch (Exception $e) {
-            if ($container->has(LoggerInterface::class)) { // Log Redis connection failure
-                $logger = $container->get(LoggerInterface::class);
-                $logger->error("Failed to connect to Redis for rate limiting: " . $e->getMessage());
-            } else {
-                error_log("Failed to connect to Redis for rate limiting: " . $e->getMessage());
-            }
-            $redisClient = null; 
-        }
-    }
-    $rateLimitMiddleware = new RateLimitMiddleware(
-        (int)($_ENV['RATE_LIMIT_CUD_REQUESTS'] ?? 50),
-        (int)($_ENV['RATE_LIMIT_CUD_WINDOW_SECONDS'] ?? 86400),
-        $redisClient
-    );
-    $app->add($rateLimitMiddleware);
+    // --- Rate Limiting Middleware ---
+    // DO NOT INSTANTIATE OR ADD $app->add(RateLimitMiddleware::class) or similar here.
+    // We will do it directly in routes.php.
 
     // --- Error Handling Middleware ---
     $customErrorHandler = function (
