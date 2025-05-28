@@ -17,7 +17,7 @@ class CreateSnippetAction
     private PDO $db;
     private HTMLPurifier $htmlPurifier;
     private LoggerInterface $logger;
-    private const MAX_SNIPPETS_LIMIT = 500; // Define the limit
+    private const MAX_SNIPPETS_LIMIT = 5; // Define the limit
 
     public function __construct(PDO $db, HTMLPurifier $htmlPurifier, LoggerInterface $logger)
     {
