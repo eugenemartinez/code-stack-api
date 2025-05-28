@@ -17,6 +17,7 @@ class CreateSnippetAction
     private PDO $db;
     private HTMLPurifier $htmlPurifier;
     private LoggerInterface $logger;
+    private const MAX_SNIPPETS_LIMIT = 500; // Define the limit
 
     public function __construct(PDO $db, HTMLPurifier $htmlPurifier, LoggerInterface $logger)
     {
@@ -36,6 +37,30 @@ class CreateSnippetAction
         // ---- END PHP.INI DEBUG ----
 
         // error_log("CreateSnippetAction invoked from action file. Timestamp: " . time()); 
+        
+        // --- 0. Check Snippet Count Limit ---
+        try {
+            $countStmt = $this->db->query("SELECT COUNT(*) FROM code_snippets");
+            $currentSnippetCount = (int)$countStmt->fetchColumn();
+
+            if ($currentSnippetCount >= self::MAX_SNIPPETS_LIMIT) {
+                $this->logger->warning("Snippet creation denied: Maximum snippet limit reached.", [
+                    'current_count' => $currentSnippetCount,
+                    'limit' => self::MAX_SNIPPETS_LIMIT
+                ]);
+                $errorPayload = [
+                    'error' => 'Service Unavailable',
+                    'message' => 'The maximum number of snippets (' . self::MAX_SNIPPETS_LIMIT . ') has been reached. Please try again later after some snippets have been removed.'
+                ];
+                $response->getBody()->write(json_encode($errorPayload));
+                // 503 Service Unavailable is appropriate here, or 403 Forbidden
+                return $response->withHeader('Content-Type', 'application/json')->withStatus(503);
+            }
+        } catch (\PDOException $e) {
+            $this->logger->error("Database error checking snippet count: " . $e->getMessage(), ['exception' => $e]);
+            $response->getBody()->write(json_encode(['error' => 'Failed to check snippet capacity due to a database issue.']));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
+        }
         
         $parsedBody = $request->getParsedBody();
 

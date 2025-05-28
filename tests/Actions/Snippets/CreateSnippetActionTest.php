@@ -59,9 +59,27 @@ class CreateSnippetActionTest extends TestCase
             });
     }
 
+    // ADD THIS HELPER METHOD:
+    protected function mockSnippetCountQuery(int $currentCount): void
+    {
+        $countStmtMock = $this->createMock(PDOStatement::class);
+        $countStmtMock->expects($this->once()) // Expect fetchColumn to be called once
+            ->method('fetchColumn')
+            ->willReturn($currentCount); // Return the desired count
+
+        // Important: This expectation should be specific enough if pdoMock->query()
+        // might be called for other reasons in more complex scenarios.
+        // For now, assuming it's only for the count.
+        $this->pdoMock->expects($this->once()) // Expect query to be called once for the count
+            ->method('query')
+            ->with("SELECT COUNT(*) FROM code_snippets") // With this specific SQL
+            ->willReturn($countStmtMock); // Return the mock statement for the count query
+    }
+
     public function testSuccessfulSnippetCreation()
     {
         $action = new CreateSnippetAction($this->pdoMock, $this->htmlPurifierMock, $this->loggerMock);
+        $this->mockSnippetCountQuery(0); // Now this call will be valid
 
         $requestBody = [
             'title' => 'Test Title',
@@ -133,6 +151,7 @@ class CreateSnippetActionTest extends TestCase
     public function testCreationFailsWithMissingTitle()
     {
         $action = new CreateSnippetAction($this->pdoMock, $this->htmlPurifierMock, $this->loggerMock);
+        $this->mockSnippetCountQuery(0); // <--- ADDED
 
         $requestBody = [
             // 'title' => '', // Intentionally missing or empty to trigger validation
@@ -178,6 +197,7 @@ class CreateSnippetActionTest extends TestCase
     public function testCreationFailsWithMissingCode()
     {
         $action = new CreateSnippetAction($this->pdoMock, $this->htmlPurifierMock, $this->loggerMock);
+        $this->mockSnippetCountQuery(0); // <--- ADDED
 
         $requestBody = [
             'title' => 'Test Title for Missing Code',
@@ -231,6 +251,7 @@ class CreateSnippetActionTest extends TestCase
     public function testCreationFailsWithMissingLanguage()
     {
         $action = new CreateSnippetAction($this->pdoMock, $this->htmlPurifierMock, $this->loggerMock);
+        $this->mockSnippetCountQuery(0); // <--- ADDED
 
         $requestBody = [
             'title' => 'Test Title for Missing Language',
@@ -282,6 +303,7 @@ class CreateSnippetActionTest extends TestCase
     public function testCreationFailsWithTitleTooLong()
     {
         $action = new CreateSnippetAction($this->pdoMock, $this->htmlPurifierMock, $this->loggerMock);
+        $this->mockSnippetCountQuery(0); // <--- ADDED
 
         $tooLongTitle = str_repeat('a', 256); // Title is 256 characters, max is 255
 
@@ -335,6 +357,7 @@ class CreateSnippetActionTest extends TestCase
     public function testCreationFailsWithLanguageTooLong()
     {
         $action = new CreateSnippetAction($this->pdoMock, $this->htmlPurifierMock, $this->loggerMock);
+        $this->mockSnippetCountQuery(0); // <--- ADDED
 
         $tooLongLanguage = str_repeat('l', 51); // Language is 51 characters, max is 50
 
@@ -388,6 +411,7 @@ class CreateSnippetActionTest extends TestCase
     public function testCreationFailsWithDescriptionTooLong()
     {
         $action = new CreateSnippetAction($this->pdoMock, $this->htmlPurifierMock, $this->loggerMock);
+        $this->mockSnippetCountQuery(0); // <--- ADDED
 
         $tooLongDescription = str_repeat('d', 1001); // Description is 1001 characters, max is 1000
 
@@ -441,6 +465,7 @@ class CreateSnippetActionTest extends TestCase
     public function testCreationFailsWithTagTooLong()
     {
         $action = new CreateSnippetAction($this->pdoMock, $this->htmlPurifierMock, $this->loggerMock);
+        $this->mockSnippetCountQuery(0); // <--- ADDED
 
         $tooLongTag = str_repeat('t', 51); // Tag is 51 characters, max is 50
         $expectedErrorMessage = sprintf('These rules must pass for "%s"', $tooLongTag);
@@ -496,6 +521,7 @@ class CreateSnippetActionTest extends TestCase
     public function testCreationFailsWithTagsNotAnArray()
     {
         $action = new CreateSnippetAction($this->pdoMock, $this->htmlPurifierMock, $this->loggerMock);
+        $this->mockSnippetCountQuery(0); // <--- ADDED
 
         $requestBody = [
             'title' => 'Valid Title',
@@ -554,6 +580,7 @@ class CreateSnippetActionTest extends TestCase
     public function testCreationFailsWithTagNotAString()
     {
         $action = new CreateSnippetAction($this->pdoMock, $this->htmlPurifierMock, $this->loggerMock);
+        $this->mockSnippetCountQuery(0); // <--- ADDED
 
         $nonStringTag = 12345; // A non-string value for a tag
         // Corrected: Respect\Validation does not put quotes around the value in this message format
@@ -609,6 +636,9 @@ class CreateSnippetActionTest extends TestCase
     public function testCreationFailsWithUsernameTooLong()
     {
         $action = new CreateSnippetAction($this->pdoMock, $this->htmlPurifierMock, $this->loggerMock);
+        
+        // Call mockSnippetCountQuery only ONCE
+        $this->mockSnippetCountQuery(0); 
 
         $tooLongUsername = str_repeat('u', 51); // Username is 51 characters, max is 50
 
@@ -655,7 +685,9 @@ class CreateSnippetActionTest extends TestCase
             ->with(400)
             ->willReturn($this->responseMock);
         
-        // PDO should not be touched if validation fails early
+        // PDO should not be touched for snippet insertion if validation fails early
+        // The query for COUNT(*) will have been mocked by mockSnippetCountQuery.
+        // So, we only expect 'prepare' to never be called for the INSERT/SELECT of the snippet itself.
         $this->pdoMock->expects($this->never())->method('prepare');
 
         $action($this->requestMock, $this->responseMock);
