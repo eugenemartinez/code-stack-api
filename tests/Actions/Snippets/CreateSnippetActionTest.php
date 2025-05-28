@@ -692,4 +692,63 @@ class CreateSnippetActionTest extends TestCase
 
         $action($this->requestMock, $this->responseMock);
     }
+
+    public function testCreationFailsWhenSnippetLimitIsReached()
+    {
+        $action = new CreateSnippetAction($this->pdoMock, $this->htmlPurifierMock, $this->loggerMock);
+
+        // Define the limit as it is in CreateSnippetAction.php
+        $maxSnippetsLimit = 500; 
+
+        // Mock the snippet count query to return the max limit
+        $this->mockSnippetCountQuery($maxSnippetsLimit);
+
+        // Request body is needed for getParsedBody, but its content doesn't matter much
+        // as the action should exit before processing it deeply.
+        $requestBody = [
+            'title' => 'Attempt to Create When Full',
+            'code' => 'echo "this should not be saved";',
+            'language' => 'php',
+            'username' => 'TestUserLimit',
+            'description' => 'Testing snippet limit',
+            'tags' => ['limit-test']
+        ];
+        $this->requestMock->method('getParsedBody')->willReturn($requestBody);
+
+        // Expect logger->warning to be called due to the limit being reached
+        $this->loggerMock->expects($this->once())
+            ->method('warning')
+            ->with(
+                $this->stringContains("Snippet creation denied: Maximum snippet limit reached."),
+                $this->callback(function ($context) use ($maxSnippetsLimit) {
+                    return isset($context['current_count']) && $context['current_count'] === $maxSnippetsLimit &&
+                           isset($context['limit']) && $context['limit'] === $maxSnippetsLimit;
+                })
+            );
+
+        // Expect response->getBody()->write() to be called with the specific error message
+        $expectedErrorMessage = 'The maximum number of snippets (' . $maxSnippetsLimit . ') has been reached. Please try again later after some snippets have been removed.';
+        $this->streamMock->expects($this->once())
+            ->method('write')
+            ->with($this->callback(function ($jsonString) use ($expectedErrorMessage) {
+                $data = json_decode($jsonString, true);
+                return isset($data['error']) && $data['error'] === 'Service Unavailable' &&
+                       isset($data['message']) && $data['message'] === $expectedErrorMessage;
+            }));
+
+        $this->responseMock->expects($this->once())
+            ->method('withHeader')
+            ->with('Content-Type', 'application/json')
+            ->willReturn($this->responseMock);
+
+        $this->responseMock->expects($this->once())
+            ->method('withStatus')
+            ->with(503) // Service Unavailable
+            ->willReturn($this->responseMock);
+        
+        // PDO prepare for snippet insertion should NOT be called if the limit is reached
+        $this->pdoMock->expects($this->never())->method('prepare');
+
+        $action($this->requestMock, $this->responseMock);
+    }
 }
